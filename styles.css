@@ -1,0 +1,85 @@
+body {
+    background-color: azure;
+}
+
+.cabecera ul{
+    list-style-type: none;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    margin: 0px;
+}
+
+.cabecera li {
+    float: left;
+    border-radius: 15%;
+    padding: 20px;
+}
+
+.cabecera li a {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+}
+
+.cabecera li a:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+}
+
+.cabecera {
+    background-color: rgba(0, 0, 0, 0.3);
+    width: 100%;
+}
+
+.contenido {
+    width: 70vw;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+ol {
+    counter-reset: item;
+}
+
+ol p {
+    width: 40%;
+}
+
+.punto li {
+    width: 40%;
+}
+
+li {
+    display: block;
+}
+
+.contenido li::before {
+    content: counters(item, ".") " ";
+    counter-increment: item;
+    font-weight: bold;
+    color: coral;
+}
+
+.contenido ol li::marker {
+    font-weight: bold;
+}
+
+.contenido ol li {
+    counter-increment: li;
+    display: list-item;
+}
+
+.contenido ol li::marker {
+    font-weight: bold;
+    display: list-item;
+    content: "#" ""; 
+    color: coral;
+    font-weight: bold;
+}
+
+body {
+    counter-reset: li;
+    line-height: 1.4;
+}
