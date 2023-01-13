@@ -1,3 +1,4 @@
+import time
 from random import randint
 
 import dades as dades
@@ -182,12 +183,44 @@ def menu012():
 
 
 def menu013():
+    dict_humanos = {}
+    dict_robot = {}
+    dict_player = {1: dict_robot, 2: dict_humanos}
+    lista = ["g", "Catious", "Moderated", "Bold"]
     print(dades.cabecera_menu013)
-    mycursor.execute("SELECT player_id, player_name, player_risk FROM player")
+    mycursor.execute("SELECT human, player_id, player_name, player_risk FROM player")
     myresult = mycursor.fetchall()
     for x in myresult:
-        for i in x:
-            print(x)
+        print(x)
+        if x[0] == 0:
+            dict_robot.update({x[1]:{"Name": x[2], "Profile": lista[x[3]]}})
+        elif x[0] == 1:
+            dict_humanos.update({x[1]:{"Name": x[2], "Profile": lista[x[3]]}})
+
+    sum = 1
+    while sum != 0:
+        lista_identificador = []
+        if sum == 1:
+            for identificador in dict_player[sum]:
+                if identificador not in lista_identificador:
+                    lista_identificador.append(identificador)
+                    print(identificador, dict_robot[identificador], end="")
+                else:
+                    print("".rjust(50))
+            sum = 2
+        elif sum == 2:
+            for identificador in dict_player[sum]:
+                if identificador not in lista_identificador:
+                    lista_identificador.append(identificador)
+                    print(identificador, dict_humanos[identificador])
+                else:
+                    print("".rjust(50))
+            sum = 1
+
+        time.sleep(1)
+
+
+
 
 
 # Menú 2
