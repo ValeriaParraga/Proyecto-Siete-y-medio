@@ -1,13 +1,13 @@
 import time
 from random import randint
 
-import dades as dades
+import dades
 
 import mysql.connector
 mydb = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="1234",
+    host="dbvad.mysql.database.azure.com",
+    user="GPVAD",
+    password="123Valeriaandreadiego.",
     database="SAH"
 )
 mycursor = mydb.cursor()
@@ -184,40 +184,61 @@ def menu012():
 
 def menu013():
     dict_humanos = {}
+    list_dict_h = []
     dict_robot = {}
+    list_dict_r = []
     dict_player = {1: dict_robot, 2: dict_humanos}
     lista = ["g", "Catious", "Moderated", "Bold"]
     print(dades.cabecera_menu013)
     mycursor.execute("SELECT human, player_id, player_name, player_risk FROM player")
     myresult = mycursor.fetchall()
     for x in myresult:
-        print(x)
         if x[0] == 0:
-            dict_robot.update({x[1]:{"Name": x[2], "Profile": lista[x[3]]}})
+            dict_robot.update({x[1]:{"Name": x[2], "Profile": lista[x[3]], "Human": x[0]}})
+            list_dict_r.append(x)
         elif x[0] == 1:
-            dict_humanos.update({x[1]:{"Name": x[2], "Profile": lista[x[3]]}})
-
-    sum = 1
-    while sum != 0:
+            dict_humanos.update({x[1]:{"Name": x[2], "Profile": lista[x[3]], "Human": x[0]}})
+            list_dict_h.append(x)
+    sum = "0"
+    while sum.isdigit():
         lista_identificador = []
-        if sum == 1:
-            for identificador in dict_player[sum]:
-                if identificador not in lista_identificador:
-                    lista_identificador.append(identificador)
-                    print(identificador, dict_robot[identificador], end="")
-                else:
-                    print("".rjust(50))
-            sum = 2
-        elif sum == 2:
-            for identificador in dict_player[sum]:
-                if identificador not in lista_identificador:
-                    lista_identificador.append(identificador)
-                    print(identificador, dict_humanos[identificador])
-                else:
-                    print("".rjust(50))
-            sum = 1
 
-        time.sleep(1)
+
+        try:
+            if len(list_dict_h) >= len(list_dict_r):
+                if len(list_dict_r) == int(sum):
+                    raise TypeError(f"{sum}", "hMayor")
+                if isinstance(list_dict_h, list):
+                    print(f"{list_dict_r[int(sum)][1]}".ljust(20) + f"{list_dict_r[int(sum)][2]}".ljust(25) + f"{lista[list_dict_r[int(sum)][3]]}" +"||".rjust(20), end="")
+                    print("",f"{list_dict_h[int(sum)][1]}".ljust(19),f"{list_dict_h[int(sum)][2]}".ljust(24), f"{lista[list_dict_h[int(sum)][3]]}")
+
+                sum = int(sum)
+                sum += 1
+                sum = str(sum)
+            elif len(list_dict_h) < len(list_dict_r):
+                if len(list_dict_h) == int(sum):
+                    raise TypeError(f"{sum}", "rMayor")
+                if isinstance(list_dict_h, list):
+                    print(f"{list_dict_r[int(sum)][1]}".ljust(20) + f"{list_dict_r[int(sum)][2]}".ljust(25) + f"{lista[list_dict_r[int(sum)][3]]}" +"||".rjust(20), end="")
+                    print("",f"{list_dict_h[int(sum)][1]}".ljust(19),f"{list_dict_h[int(sum)][2]}".ljust(24), f"{lista[list_dict_h[int(sum)][3]]}")
+                sum = int(sum)
+                sum += 1
+                sum = str(sum)
+
+        except TypeError as TE:
+            x, y = TE.args
+            sum = int(x)
+            if y == "hMayor":
+                while sum < len(list_dict_h):
+                    print(f"||".rjust(72)+f" {list_dict_h[int(sum)][1]}".ljust(20),f"{list_dict_h[int(sum)][2]}".ljust(24), f"{lista[list_dict_h[int(sum)][3]]}")
+                    sum += 1
+                sum = "a"
+            if y == "rMayor":
+                while sum < len(list_dict_r):
+                    print(f"{list_dict_r[int(sum)][1]}".ljust(20) + f"{list_dict_r[int(sum)][2]}".ljust(25) + f"{lista[list_dict_r[int(sum)][3]]}" +"||".rjust(20))
+                    sum += 1
+                sum = "a"
+
 
 
 

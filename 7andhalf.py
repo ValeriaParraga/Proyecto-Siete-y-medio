@@ -1,5 +1,4 @@
-import Funcions.funcions as funcions
-import Funcions.dades as dades
+from Funcions import dades, funcions
 
 # Programa
 
