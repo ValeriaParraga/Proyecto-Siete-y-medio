@@ -1,4 +1,3 @@
-import time
 from random import randint
 
 import dades
@@ -13,6 +12,8 @@ mydb = mysql.connector.connect(
 mycursor = mydb.cursor()
 # Función para la gestión de menús
 
+setGamePlayers = []
+gameReady = False
 def getOpt(textOpts="", inputOptText="", rangeList=[], exceptions=[]):
     print(textOpts)
     while True:
@@ -32,6 +33,7 @@ def getOpt(textOpts="", inputOptText="", rangeList=[], exceptions=[]):
 
 # Menú 0
 
+
 def menu00():
     dejar_este_nivel = False
     while not dejar_este_nivel:
@@ -42,8 +44,7 @@ def menu00():
         exceptions = ["S"]
         opc = getOpt(textOpts, inputOptText, lista, exceptions)
         if opc == 1:
-            while opc == 1:
-                menu01()
+            menu01()
         elif opc == 2:
             menu02()
         elif opc == 3:
@@ -59,8 +60,8 @@ def menu00():
 # Menú 1
 
 def menu01():
-    dejar_este_nivel = False
-    while not dejar_este_nivel:
+    dejar_nivel_1 = False
+    while not dejar_nivel_1:
         print(dades.cabecera_menu01)
         textOpts = "1)New Human Player\n2)New Bot\n3)Show/Remove Players\nS)Go back"
         inputOptText = "Option: "
@@ -74,7 +75,8 @@ def menu01():
         elif opc == 3:
             menu013()
         elif opc == "S":
-            dejar_este_nivel = True
+            print("dejar este nivel = True")
+            dejar_nivel_1 = True
 
 # Opciones del menú 1
 
@@ -203,7 +205,6 @@ def menu013():
     while sum.isdigit():
         lista_identificador = []
 
-
         try:
             if len(list_dict_h) >= len(list_dict_r):
                 if len(list_dict_r) == int(sum):
@@ -219,7 +220,7 @@ def menu013():
                 if len(list_dict_h) == int(sum):
                     raise TypeError(f"{sum}", "rMayor")
                 if isinstance(list_dict_h, list):
-                    print(f"{list_dict_r[int(sum)][1]}".ljust(20) + f"{list_dict_r[int(sum)][2]}".ljust(25) + f"{lista[list_dict_r[int(sum)][3]]}" +"||".rjust(20), end="")
+                    print(f"{list_dict_r[int(sum)][1]}".ljust(20) + f"{list_dict_r[int(sum)][2]}".ljust(25) + f"{lista[list_dict_r[int(sum)][3]]}".ljust(25) +"||", end="")
                     print("",f"{list_dict_h[int(sum)][1]}".ljust(19),f"{list_dict_h[int(sum)][2]}".ljust(24), f"{lista[list_dict_h[int(sum)][3]]}")
                 sum = int(sum)
                 sum += 1
@@ -235,7 +236,7 @@ def menu013():
                 sum = "a"
             if y == "rMayor":
                 while sum < len(list_dict_r):
-                    print(f"{list_dict_r[int(sum)][1]}".ljust(20) + f"{list_dict_r[int(sum)][2]}".ljust(25) + f"{lista[list_dict_r[int(sum)][3]]}" +"||".rjust(20))
+                    print(f"{list_dict_r[int(sum)][1]}".ljust(20) + f"{list_dict_r[int(sum)][2]}".ljust(25) + f"{lista[list_dict_r[int(sum)][3]]}".ljust(25) +"||")
                     sum += 1
                 sum = "a"
 
@@ -265,9 +266,33 @@ def menu02():
             dejar_este_nivel = True
 
 # Opciones del menú 2
+def extractor(lista):
+    return [item[0] for item in lista]
 
 def menu021():
-    print("aquí va el ejercicio")
+    menu013()
+
+    mycursor.execute("SELECT player_id, player_name, player_risk FROM player")
+    myresult = mycursor.fetchall()
+    ids = []
+    for i in myresult:
+        ids.append(i)
+
+    addPlayer = input("Escriba la id del jugador que desea participar en el juego: ")
+    if addPlayer in extractor(ids):
+        if len(setGamePlayers) < 6:
+            print("Id valida, se procede a añadir")
+            setGamePlayers.append(addPlayer)
+        else:
+            print("Te pasaste de jugadores, empieza a jugar")
+
+    else:
+        print("Id invalida, vuelve a intentarlo")
+    if 2 <=len(setGamePlayers) <= 6:
+        if len(setGamePlayers) < 6:
+            gameReady = True
+            print("Estas listo para empezar a jugar")
+    input("Enter to continue")
 def menu022():
     print("aquí va el ejercicio")
 def menu023():
@@ -371,5 +396,3 @@ def menu0510():
     print("aquí va el ejercicio")
 
 # Programa
-
-menu00()
