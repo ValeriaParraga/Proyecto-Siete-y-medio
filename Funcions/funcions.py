@@ -13,6 +13,11 @@ mydb = mysql.connector.connect(
 mycursor = mydb.cursor()
 # Función para la gestión de menús
 
+deckReady = False
+gameReady = False
+
+setDeck = []
+setPlayers = []
 def getOpt(textOpts="", inputOptText="", rangeList=[], exceptions=[]):
     print(textOpts)
     while True:
@@ -42,8 +47,7 @@ def menu00():
         exceptions = ["S"]
         opc = getOpt(textOpts, inputOptText, lista, exceptions)
         if opc == 1:
-            while opc == 1:
-                menu01()
+            menu01()
         elif opc == 2:
             menu02()
         elif opc == 3:
@@ -187,7 +191,6 @@ def menu013():
     list_dict_h = []
     dict_robot = {}
     list_dict_r = []
-    dict_player = {1: dict_robot, 2: dict_humanos}
     lista = ["g", "Catious", "Moderated", "Bold"]
     print(dades.cabecera_menu013)
     mycursor.execute("SELECT human, player_id, player_name, player_risk FROM player")
@@ -202,8 +205,6 @@ def menu013():
 
     sum = "0"
     while sum.isdigit():
-        lista_identificador = []
-
         try:
             if len(list_dict_h) >= len(list_dict_r):
                 if len(list_dict_r) == int(sum):
@@ -446,20 +447,26 @@ def menu022():
     if opc.isdigit():
         opc = int(opc)
         if opc == 1:
+            dades.mazo.clear()
             print("Established Card Deck ESP, Baraja Española")
             input("Enter to continue " + " " * 59)
-            dades.mazo = "española"
+            dades.mazo.append("española")
             menu02()
+            deckReady = True
         elif opc == 2:
+            dades.mazo.clear()
             print("Established Card Deck POK, Poker Deck")
             input("Enter to continue " + " " * 59)
-            dades.mazo = "poker"
+            dades.mazo.append("poker")
             menu02()
+            deckReady = True
         elif opc == 0:
+            dades.mazo.clear()
             print("Established Card Deck POK, Poker Deck")
             input("Enter to continue " + " " * 59)
-            dades.mazo = "poker"
+            dades.mazo.append("poker")
             menu02()
+            deckReady = True
         else:
             print("===============================================================Invalid Option====="
                   "==========================================================")
@@ -495,29 +502,23 @@ def menu023():
 # Menú 3
 
 def menu03():
-    print("El juego")
-
-    if dades.player_seleccionado == {}:
-        print("Set the players that compose the game first")
-        input("Enter to continue ")
-        menu00()
-    elif len(dades.player_seleccionado) < 2:
-        print("Set the players that compose the game first")
-        input("Enter to continue ")
-        menu00()
-    else:
-        if dades.mazo == "":
-            print("Set the deck of cards first")
-            input("Enter to continue ")
-            menu00()
-        elif dades.max_rondas == 0:
-            print("Set the max rounds of the game first")
-            input("Enter to continue ")
-            menu00()
+    def menu03():
+        if gameReady == False:
+            print("Add players (minimum of 2) to start playing.")
+        elif setDeck == []:
+            print("Select a deck to start playing.")
         else:
-            print(dades.cabecera_menu03)
-            print("1)View Stats\n2)View Game Stats\n3)Set Bet\n4)Order Card\n5)Automatic Play\n6)Stand")
-            input("Option: ")
+            if dades.max_rondas == 0:
+                print("No rounds inserted, we will proceed with a max of 5.")
+                dades.max_rondas = 5
+            if deckReady is True and gameReady is True and dades.max_rondas > 0:
+                input("Everything is OK, the game will start!\n Enter to continue.")
+
+                mycursor.execute("SELECT player_id, player_name, player_risk FROM player")
+                myresult = mycursor.fetchall()
+                ids = []
+                for i in myresult:
+                    ids.append(i)
 
 # Menú 4
 

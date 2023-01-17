@@ -190,6 +190,6 @@ DNILetras = ["T","R","W","A", "G", "M", "Y","F", "P", "D", "X", "B", "N", "J", "
 
 player_seleccionado = {}
 
-mazo = ""
+mazo = []
 
 max_rondas = 0
