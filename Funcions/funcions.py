@@ -187,7 +187,6 @@ def menu013():
     list_dict_h = []
     dict_robot = {}
     list_dict_r = []
-    dict_player = {1: dict_robot, 2: dict_humanos}
     lista = ["g", "Catious", "Moderated", "Bold"]
     print(dades.cabecera_menu013)
     mycursor.execute("SELECT human, player_id, player_name, player_risk FROM player")
@@ -202,7 +201,6 @@ def menu013():
 
     sum = "0"
     while sum.isdigit():
-        lista_identificador = []
 
         try:
             if len(list_dict_h) >= len(list_dict_r):
