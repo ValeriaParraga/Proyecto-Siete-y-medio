@@ -1,6 +1,7 @@
+import time
 from random import randint
 
-import dades
+import dades as dades
 
 import mysql.connector
 mydb = mysql.connector.connect(
@@ -12,8 +13,6 @@ mydb = mysql.connector.connect(
 mycursor = mydb.cursor()
 # Función para la gestión de menús
 
-setGamePlayers = []
-gameReady = False
 def getOpt(textOpts="", inputOptText="", rangeList=[], exceptions=[]):
     print(textOpts)
     while True:
@@ -33,7 +32,6 @@ def getOpt(textOpts="", inputOptText="", rangeList=[], exceptions=[]):
 
 # Menú 0
 
-
 def menu00():
     dejar_este_nivel = False
     while not dejar_este_nivel:
@@ -44,7 +42,8 @@ def menu00():
         exceptions = ["S"]
         opc = getOpt(textOpts, inputOptText, lista, exceptions)
         if opc == 1:
-            menu01()
+            while opc == 1:
+                menu01()
         elif opc == 2:
             menu02()
         elif opc == 3:
@@ -60,8 +59,8 @@ def menu00():
 # Menú 1
 
 def menu01():
-    dejar_nivel_1 = False
-    while not dejar_nivel_1:
+    dejar_este_nivel = False
+    while not dejar_este_nivel:
         print(dades.cabecera_menu01)
         textOpts = "1)New Human Player\n2)New Bot\n3)Show/Remove Players\nS)Go back"
         inputOptText = "Option: "
@@ -75,8 +74,7 @@ def menu01():
         elif opc == 3:
             menu013()
         elif opc == "S":
-            print("dejar este nivel = True")
-            dejar_nivel_1 = True
+            dejar_este_nivel = True
 
 # Opciones del menú 1
 
@@ -196,11 +194,12 @@ def menu013():
     myresult = mycursor.fetchall()
     for x in myresult:
         if x[0] == 0:
-            dict_robot.update({x[1]:{"Name": x[2], "Profile": lista[x[3]], "Human": x[0]}})
+            dict_robot.update({x[1]: {"Name": x[2], "Profile": lista[x[3]], "Human": x[0]}})
             list_dict_r.append(x)
         elif x[0] == 1:
-            dict_humanos.update({x[1]:{"Name": x[2], "Profile": lista[x[3]], "Human": x[0]}})
+            dict_humanos.update({x[1]: {"Name": x[2], "Profile": lista[x[3]], "Human": x[0]}})
             list_dict_h.append(x)
+
     sum = "0"
     while sum.isdigit():
         lista_identificador = []
@@ -210,18 +209,23 @@ def menu013():
                 if len(list_dict_r) == int(sum):
                     raise TypeError(f"{sum}", "hMayor")
                 if isinstance(list_dict_h, list):
-                    print(f"{list_dict_r[int(sum)][1]}".ljust(20) + f"{list_dict_r[int(sum)][2]}".ljust(25) + f"{lista[list_dict_r[int(sum)][3]]}" +"||".rjust(20), end="")
-                    print("",f"{list_dict_h[int(sum)][1]}".ljust(19),f"{list_dict_h[int(sum)][2]}".ljust(24), f"{lista[list_dict_h[int(sum)][3]]}")
+                    print(f"{list_dict_r[int(sum)][1]}".ljust(20) + f"{list_dict_r[int(sum)][2]}".ljust(
+                        25) + f"{lista[list_dict_r[int(sum)][3]]}" + "||".rjust(20), end="")
+                    print("", f"{list_dict_h[int(sum)][1]}".ljust(19), f"{list_dict_h[int(sum)][2]}".ljust(24),
+                          f"{lista[list_dict_h[int(sum)][3]]}")
 
                 sum = int(sum)
                 sum += 1
                 sum = str(sum)
+
             elif len(list_dict_h) < len(list_dict_r):
                 if len(list_dict_h) == int(sum):
                     raise TypeError(f"{sum}", "rMayor")
                 if isinstance(list_dict_h, list):
-                    print(f"{list_dict_r[int(sum)][1]}".ljust(20) + f"{list_dict_r[int(sum)][2]}".ljust(25) + f"{lista[list_dict_r[int(sum)][3]]}".ljust(25) +"||", end="")
-                    print("",f"{list_dict_h[int(sum)][1]}".ljust(19),f"{list_dict_h[int(sum)][2]}".ljust(24), f"{lista[list_dict_h[int(sum)][3]]}")
+                    print(f"{list_dict_r[int(sum)][1]}".ljust(20) + f"{list_dict_r[int(sum)][2]}".ljust(
+                        25) + f"{lista[list_dict_r[int(sum)][3]]}".ljust(25) + "||", end="")
+                    print("", f"{list_dict_h[int(sum)][1]}".ljust(19), f"{list_dict_h[int(sum)][2]}".ljust(24),
+                          f"{lista[list_dict_h[int(sum)][3]]}")
                 sum = int(sum)
                 sum += 1
                 sum = str(sum)
@@ -231,19 +235,32 @@ def menu013():
             sum = int(x)
             if y == "hMayor":
                 while sum < len(list_dict_h):
-                    print(f"||".rjust(72)+f" {list_dict_h[int(sum)][1]}".ljust(20),f"{list_dict_h[int(sum)][2]}".ljust(24), f"{lista[list_dict_h[int(sum)][3]]}")
+                    print(f"||".rjust(72) + f" {list_dict_h[int(sum)][1]}".ljust(20),
+                          f"{list_dict_h[int(sum)][2]}".ljust(24), f"{lista[list_dict_h[int(sum)][3]]}")
                     sum += 1
                 sum = "a"
             if y == "rMayor":
                 while sum < len(list_dict_r):
-                    print(f"{list_dict_r[int(sum)][1]}".ljust(20) + f"{list_dict_r[int(sum)][2]}".ljust(25) + f"{lista[list_dict_r[int(sum)][3]]}".ljust(25) +"||")
+                    print(f"{list_dict_r[int(sum)][1]}".ljust(20) + f"{list_dict_r[int(sum)][2]}".ljust(
+                        25) + f"{lista[list_dict_r[int(sum)][3]]}".ljust(25) + "||")
                     sum += 1
                 sum = "a"
 
-
-
-
-
+    print(dades.asteriscos)
+    question = input("Option ( -id to remove player, -1 to exit): \n")
+    if question[0] == "-" and question[1:] in dict_robot or question[1:] in dict_humanos:
+        question = question[1:]
+        sql = f"DELETE FROM player WHERE player_id = '{question}'"
+        mycursor.execute(sql)
+        mydb.commit()
+        print(mycursor.rowcount, "record(s) deleted")
+    elif question == "-1":
+        menu01()
+    else:
+        print("===============================================================Invalid Option====="
+              "==========================================================")
+        input(" " * 58 + "Press enter to continue" + " " * 59)
+        menu013()
 
 # Menú 2
 
@@ -266,43 +283,241 @@ def menu02():
             dejar_este_nivel = True
 
 # Opciones del menú 2
-def extractor(lista):
-    return [item[0] for item in lista]
 
 def menu021():
-    menu013()
+    print(dades.cabecera_menu021)
 
-    mycursor.execute("SELECT player_id, player_name, player_risk FROM player")
-    myresult = mycursor.fetchall()
-    ids = []
-    for i in myresult:
-        ids.append(i)
+    if dades.player_seleccionado == {}:
+        print(" " * 40 + "*******************ActualPlayersInGame*******************" + " " * 40)
+        print(" " * 55 + "There is no players in game" + " " * 55)
+        input(" " * 60 + "Enter to continue" + " " * 63)
+        print(dades.cabecera_menu0211)
 
-    addPlayer = input("Escriba la id del jugador que desea participar en el juego: ")
-    if addPlayer in extractor(ids):
-        if len(setGamePlayers) < 6:
-            print("Id valida, se procede a añadir")
-            setGamePlayers.append(addPlayer)
+        dict_humanos = {}
+        dict_robot = {}
+        lista = ["g", "Catious", "Moderated", "Bold"]
+        print(dades.cabecera_menu013)
+        mycursor.execute("SELECT human, player_id, player_name, player_risk FROM player")
+        myresult = mycursor.fetchall()
+        for x in myresult:
+            if x[0] == 0:
+                dict_robot.update({x[1]: {"Name": x[2], "Profile": lista[x[3]]}})
+            elif x[0] == 1:
+                dict_humanos.update({x[1]: {"Name": x[2], "Profile": lista[x[3]]}})
+
+        cadena = str()
+
+        for i in dict_robot:
+            cadena = cadena + (str(i).rjust(9) + "           " + dict_robot[i].get("Name").ljust(25) +
+                               str(dict_robot[i].get("Profile")))
+        print(cadena, end="")
+
+        cadena = str()
+
+        for i in dict_humanos:
+            cadena = cadena + (str(i).rjust(9) + '           ' + dict_humanos[i].get("Name").ljust(25) +
+                               str(dict_humanos[i].get("Profile")) + '\n')
+        print(cadena)
+
+        print(dades.asteriscos)
+        question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                         "-1 to go back:\n")
+        if question in dict_robot or question in dict_humanos:
+            lista = ["g", "Catious", "Moderated", "Bold"]
+            human = ["Human", "Boot"]
+            print(" " * 40 + "*******************ActualPlayersInGame*******************" + " " * 40)
+            mycursor.execute("SELECT player_id, player_name, human, player_risk FROM player")
+
+            myresult = mycursor.fetchall()
+
+            for x in myresult:
+                if x[0] == question:
+                    dades.player_seleccionado.update({x[0]: {"Name": x[1], "Human": human[x[2]], "Profile": lista[x[3]]}})
+
+            cadena = str()
+
+            for i in dades.player_seleccionado:
+                cadena = cadena + (' ' * 50 + str(i) + '    ' + dades.player_seleccionado[i].get("Name") + '  ' + dades.player_seleccionado[i].get("Human") +
+                                   '   ' + dades.player_seleccionado[i].get("Profile") + '\n')
+                print(cadena)
+
+            input(" " * 58 + "Press enter to continue" + " " * 59)
+
+        elif question[0] == "-" and question[1:] in dict_robot or question[1:] in dict_humanos:
+            question = question[1:]
+            sql = f"DELETE FROM player WHERE player_id = '{question}'"
+            mycursor.execute(sql)
+            mydb.commit()
+            print(mycursor.rowcount, "record(s) deleted")
+        elif question == "-1":
+            menu02()
         else:
-            print("Te pasaste de jugadores, empieza a jugar")
-
+            print("===============================================================Invalid Option====="
+                  "==========================================================")
+            input(" " * 58 + "Press enter to continue" + " " * 59)
     else:
-        print("Id invalida, vuelve a intentarlo")
-    if 2 <=len(setGamePlayers) <= 6:
-        if len(setGamePlayers) < 6:
-            gameReady = True
-            print("Estas listo para empezar a jugar")
-    input("Enter to continue")
+
+        print(" " * 40 + "*******************ActualPlayersInGame*******************" + " " * 40)
+        cadena = str()
+
+        for i in dades.player_seleccionado:
+            cadena = cadena + (
+                        ' ' * 50 + str(i) + '    ' + dades.player_seleccionado[i].get("Name") + '  ' + dades.player_seleccionado[
+                    i].get("Human") +
+                        '   ' + dades.player_seleccionado[i].get("Profile") + '\n')
+            print(cadena)
+
+        input(" " * 58 + "Press enter to continue" + " " * 59)
+
+        print(dades.cabecera_menu0211)
+
+        dict_humanos = {}
+        dict_robot = {}
+        lista = ["g", "Catious", "Moderated", "Bold"]
+        print(dades.cabecera_menu013)
+        mycursor.execute("SELECT human, player_id, player_name, player_risk FROM player")
+        myresult = mycursor.fetchall()
+        for x in myresult:
+            if x[0] == 0:
+                dict_robot.update({x[1]: {"Name": x[2], "Profile": lista[x[3]]}})
+            elif x[0] == 1:
+                dict_humanos.update({x[1]: {"Name": x[2], "Profile": lista[x[3]]}})
+
+        cadena = str()
+
+        for i in dict_robot:
+            cadena = cadena + (str(i).rjust(9) + "           " + dict_robot[i].get("Name").ljust(25) +
+                               str(dict_robot[i].get("Profile")))
+        print(cadena, end="")
+
+        cadena = str()
+
+        for i in dict_humanos:
+            cadena = cadena + (str(i).rjust(9) + '           ' + dict_humanos[i].get("Name").ljust(25) +
+                               str(dict_humanos[i].get("Profile")) + '\n')
+        print(cadena)
+
+        print(dades.asteriscos)
+        question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                         "-1 to go back:\n")
+        if question in dict_robot or question in dict_humanos:
+            lista = ["g", "Catious", "Moderated", "Bold"]
+            human = ["Human", "Boot"]
+            print(" " * 40 + "*******************ActualPlayersInGame*******************" + " " * 40)
+            mycursor.execute("SELECT player_id, player_name, human, player_risk FROM player")
+
+            myresult = mycursor.fetchall()
+
+            for x in myresult:
+                if x[0] == question:
+                    dades.player_seleccionado.update(
+                        {x[0]: {"Name": x[1], "Human": human[x[2]], "Profile": lista[x[3]]}})
+
+            cadena = str()
+
+            for i in dades.player_seleccionado:
+                cadena = cadena + (' ' * 50 + str(i) + '    ' + dades.player_seleccionado[i].get("Name") + '  ' +
+                                   dades.player_seleccionado[i].get("Human") +
+                                   '   ' + dades.player_seleccionado[i].get("Profile") + '\n')
+                print(cadena)
+
+            input(" " * 58 + "Press enter to continue" + " " * 59)
+
+        elif question[0] == "-" and question[1:] in dict_robot or question[1:] in dict_humanos:
+            question = question[1:]
+            sql = f"DELETE FROM player WHERE player_id = '{question}'"
+            mycursor.execute(sql)
+            mydb.commit()
+            print(mycursor.rowcount, "record(s) deleted")
+        elif question == "-1":
+            menu02()
+        else:
+            print("===============================================================Invalid Option====="
+                  "==========================================================")
+            input(" " * 58 + "Press enter to continue" + " " * 59)
+
+
+
 def menu022():
-    print("aquí va el ejercicio")
+    print(dades.cabecera_menu022)
+    print("1) ESP - ESP\n2) POK - POK\n0) Go back")
+    opc = input("Option: ")
+
+    if opc.isdigit():
+        opc = int(opc)
+        if opc == 1:
+            print("Established Card Deck ESP, Baraja Española")
+            input("Enter to continue " + " " * 59)
+            dades.mazo = "española"
+            menu02()
+        elif opc == 2:
+            print("Established Card Deck POK, Poker Deck")
+            input("Enter to continue " + " " * 59)
+            dades.mazo = "poker"
+            menu02()
+        elif opc == 0:
+            print("Established Card Deck POK, Poker Deck")
+            input("Enter to continue " + " " * 59)
+            dades.mazo = "poker"
+            menu02()
+        else:
+            print("===============================================================Invalid Option====="
+                  "==========================================================")
+            input(" " * 58 + "Press enter to continue" + " " * 59)
+            menu022()
+    else:
+        print("===============================================================Invalid Option====="
+              "==========================================================")
+        input(" " * 58 + "Press enter to continue" + " " * 59)
+        menu022()
+
 def menu023():
-    print("aquí va el ejercicio")
+    print(dades.cabecera_menu023)
+    rondas = input("Max Rounds :")
+
+    if rondas.isdigit():
+        rondas = int(rondas)
+
+        if rondas > 20:
+            print("Max Rounds Has To Be Between 0 and 20")
+            input("Enter to continue ")
+            menu023()
+        else:
+            print(f"Established maximum of rounds to {rondas}")
+            dades.max_rondas = rondas
+            input("Enter to continue ")
+            menu02()
+    else:
+        print("Please, enter only numbers")
+        input("Enter to continue ")
+        menu023()
 
 # Menú 3
 
 def menu03():
     print("El juego")
 
+    if dades.player_seleccionado == {}:
+        print("Set the players that compose the game first")
+        input("Enter to continue ")
+        menu00()
+    elif len(dades.player_seleccionado) < 2:
+        print("Set the players that compose the game first")
+        input("Enter to continue ")
+        menu00()
+    else:
+        if dades.mazo == "":
+            print("Set the deck of cards first")
+            input("Enter to continue ")
+            menu00()
+        elif dades.max_rondas == 0:
+            print("Set the max rounds of the game first")
+            input("Enter to continue ")
+            menu00()
+        else:
+            print(dades.cabecera_menu03)
+            print("1)View Stats\n2)View Game Stats\n3)Set Bet\n4)Order Card\n5)Automatic Play\n6)Stand")
+            input("Option: ")
 
 # Menú 4
 
@@ -396,3 +611,4 @@ def menu0510():
     print("aquí va el ejercicio")
 
 # Programa
+
