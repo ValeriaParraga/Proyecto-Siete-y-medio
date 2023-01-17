@@ -365,33 +365,47 @@ def menu021():
                     print(dades.asteriscos)
                     question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
                                      "-1 to go back:\n")
-            elif question in dades.player_seleccionado:
-                print("===============================================================Invalid Option====="
-                      "==========================================================")
-                input(" " * 58 + "Press enter to continue" + " " * 59)
-                print(dades.cabecera_menu0211)
-                showBBDDPlayer()
-                print(dades.asteriscos)
-                question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
-                                 "-1 to go back:\n")
-            elif question[0] == "-" and question[1:] in dict_robot or question[1:] in dict_humanos:
-                question = question[1:]
-                sql = f"DELETE FROM player WHERE player_id = '{question}'"
-                mycursor.execute(sql)
-                mydb.commit()
-                print(mycursor.rowcount, "record(s) deleted")
-                print(dades.cabecera_menu0211)
-                showBBDDPlayer()
-                print(dades.asteriscos)
-                question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
-                                 "-1 to go back:\n")
-            elif question == "sh":
-                showhPlayersGame()
-                print(dades.cabecera_menu0211)
-                showBBDDPlayer()
-                print(dades.asteriscos)
-                question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
-                                 "-1 to go back:\n")
+                elif question[0] == "-" and question[1:] in dict_robot or question[1:] in dict_humanos:
+                    question = question[1:]
+                    sql = f"DELETE FROM player WHERE player_id = '{question}'"
+                    mycursor.execute(sql)
+                    mydb.commit()
+                    print(mycursor.rowcount, "record(s) deleted")
+                    print(dades.cabecera_menu0211)
+                    showBBDDPlayer()
+                    print(dades.asteriscos)
+                    question = input(
+                        "Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                        "-1 to go back:\n")
+                elif question == "sh":
+                    if dades.player_seleccionado != {}:
+                        showhPlayersGame()
+                        print(dades.cabecera_menu0211)
+                        showBBDDPlayer()
+                        print(dades.asteriscos)
+                        question = input(
+                            "Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                            "-1 to go back:\n")
+                    else:
+                        print(" " * 40 + "*******************ActualPlayersInGame*******************" + " " * 40)
+                        print(" " * 55 + "There is no players in game" + " " * 55)
+                        input(" " * 60 + "Enter to continue" + " " * 63)
+                        print(dades.cabecera_menu0211)
+                        showBBDDPlayer()
+                        print(dades.asteriscos)
+                        question = input(
+                            "Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                            "-1 to go back:\n")
+                else:
+                    print("===============================================================Invalid Option====="
+                          "==========================================================")
+                    input(" " * 58 + "Press enter to continue" + " " * 59)
+                    print(dades.cabecera_menu0211)
+                    showBBDDPlayer()
+                    print(dades.asteriscos)
+                    question = input(
+                        "Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                        "-1 to go back:\n")
             else:
                 print("===============================================================Invalid Option====="
                       "==========================================================")
@@ -426,43 +440,54 @@ def menu021():
         question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
                          "-1 to go back:\n")
         while question != "-1":
+            if question not in dades.player_seleccionado:
+                if question in dict_robot or question in dict_humanos:
+                    lista = ["g", "Catious", "Moderated", "Bold"]
+                    human = ["Human", "Boot"]
+                    mycursor.execute("SELECT player_id, player_name, human, player_risk FROM player")
 
-            if question in dict_robot or question in dict_humanos:
-                lista = ["g", "Catious", "Moderated", "Bold"]
-                human = ["Human", "Boot"]
-                mycursor.execute("SELECT player_id, player_name, human, player_risk FROM player")
+                    myresult = mycursor.fetchall()
 
-                myresult = mycursor.fetchall()
+                    for x in myresult:
+                        if x[0] == question:
+                            dades.player_seleccionado.update({x[0]: {"Name": x[1], "Human": human[x[2]], "Profile": lista[x[3]]}})
 
-                for x in myresult:
-                    if x[0] == question:
-                        dades.player_seleccionado.update({x[0]: {"Name": x[1], "Human": human[x[2]], "Profile": lista[x[3]]}})
-
-                showhPlayersGame()
-                print(dades.cabecera_menu0211)
-                showBBDDPlayer()
-                print(dades.asteriscos)
-                question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
-                                 "-1 to go back:\n")
-
-            elif question[0] == "-" and question[1:] in dict_robot or question[1:] in dict_humanos:
-                question = question[1:]
-                sql = f"DELETE FROM player WHERE player_id = '{question}'"
-                mycursor.execute(sql)
-                mydb.commit()
-                print(mycursor.rowcount, "record(s) deleted")
-                print(dades.cabecera_menu0211)
-                showBBDDPlayer()
-                print(dades.asteriscos)
-                question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
-                                 "-1 to go back:\n")
-            elif question == "sh":
-                showhPlayersGame()
-                print(dades.cabecera_menu0211)
-                showBBDDPlayer()
-                print(dades.asteriscos)
-                question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
-                                 "-1 to go back:\n")
+                    showhPlayersGame()
+                    print(dades.cabecera_menu0211)
+                    showBBDDPlayer()
+                    print(dades.asteriscos)
+                    question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                                     "-1 to go back:\n")
+                elif question[0] == "-" and question[1:] in dict_robot or question[1:] in dict_humanos:
+                    question = question[1:]
+                    sql = f"DELETE FROM player WHERE player_id = '{question}'"
+                    mycursor.execute(sql)
+                    mydb.commit()
+                    print(mycursor.rowcount, "record(s) deleted")
+                    print(dades.cabecera_menu0211)
+                    showBBDDPlayer()
+                    print(dades.asteriscos)
+                    question = input(
+                        "Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                        "-1 to go back:\n")
+                elif question == "sh":
+                    showhPlayersGame()
+                    print(dades.cabecera_menu0211)
+                    showBBDDPlayer()
+                    print(dades.asteriscos)
+                    question = input(
+                        "Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                        "-1 to go back:\n")
+                else:
+                    print("===============================================================Invalid Option====="
+                          "==========================================================")
+                    input(" " * 58 + "Press enter to continue" + " " * 59)
+                    print(dades.cabecera_menu0211)
+                    showBBDDPlayer()
+                    print(dades.asteriscos)
+                    question = input(
+                        "Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                        "-1 to go back:\n")
             else:
                 print("===============================================================Invalid Option====="
                       "==========================================================")
