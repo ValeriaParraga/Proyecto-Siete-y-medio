@@ -39,11 +39,10 @@ def menu00():
         textOpts = "1)ADD/REMOVE/SHOW players\n2)Settings\n3)Play Game\n4)Ranking\n5)Reports\nS)Exit"
         inputOptText = "Option: "
         lista = [1, 2, 3, 4, 5]
-        exceptions = ["S"]
+        exceptions = ["S", "s"]
         opc = getOpt(textOpts, inputOptText, lista, exceptions)
         if opc == 1:
-            while opc == 1:
-                menu01()
+            menu01()
         elif opc == 2:
             menu02()
         elif opc == 3:
@@ -52,7 +51,7 @@ def menu00():
             menu04()
         elif opc == 5:
             menu05()
-        elif opc == "S":
+        elif opc in exceptions:
             dejar_este_nivel = True
 
 
@@ -65,7 +64,7 @@ def menu01():
         textOpts = "1)New Human Player\n2)New Bot\n3)Show/Remove Players\nS)Go back"
         inputOptText = "Option: "
         lista = [1, 2, 3]
-        exceptions = ["S"]
+        exceptions = ["S", "s"]
         opc = getOpt(textOpts, inputOptText, lista, exceptions)
         if opc == 1:
             menu011()
@@ -73,7 +72,7 @@ def menu01():
             menu012()
         elif opc == 3:
             menu013()
-        elif opc == "S":
+        elif opc in exceptions:
             dejar_este_nivel = True
 
 # Opciones del menú 1
@@ -133,6 +132,11 @@ def menu011():
         input("Enter to Continue ")
         menu011()
 
+def newRandomDNI():
+    NUMBER_DNI = randint(10000000, 99999999)
+    LETTER_DNI = dades.DNILetras[NUMBER_DNI % 23]
+    nif_bot = str(NUMBER_DNI) + str(LETTER_DNI)
+    return nif_bot
 
 def menu012():
     nameOK = False
@@ -144,9 +148,7 @@ def menu012():
         else:
             raise ValueError("Incorrect name, please, enter a name not empty with only letters")
 
-        NUMBER_DNI = randint(10000000, 99999999)
-        LETTER_DNI = dades.DNILetras[NUMBER_DNI % 23]
-        nif_bot = str(NUMBER_DNI) + str(LETTER_DNI)
+        nif_bot = newRandomDNI()
         print(f"Name:     {name}")
         print(f"DNI:      {nif_bot}")
 
@@ -181,15 +183,75 @@ def menu012():
         input("Enter to Continue ")
         menu011()
 
-
-def menu013():
+def removeBBDDPlayer():
     dict_humanos = {}
     list_dict_h = []
     dict_robot = {}
     list_dict_r = []
     dict_player = {1: dict_robot, 2: dict_humanos}
     lista = ["g", "Catious", "Moderated", "Bold"]
+    mycursor.execute("SELECT human, player_id, player_name, player_risk FROM player")
+    myresult = mycursor.fetchall()
+    for x in myresult:
+        if x[0] == 0:
+            dict_robot.update({x[1]: {"Name": x[2], "Profile": lista[x[3]], "Human": x[0]}})
+            list_dict_r.append(x)
+        elif x[0] == 1:
+            dict_humanos.update({x[1]: {"Name": x[2], "Profile": lista[x[3]], "Human": x[0]}})
+            list_dict_h.append(x)
+
+    showBBDDPlayer()
+
+    print(dades.asteriscos)
+    question = input("Option ( -id to remove player, -1 to exit): \n")
+    if question[0] == "-" and question[1:] in dict_robot or question[1:] in dict_humanos:
+        question = question[1:]
+        sql = f"DELETE FROM player WHERE player_id = '{question}'"
+        mycursor.execute(sql)
+        mydb.commit()
+        print(mycursor.rowcount, "record(s) deleted")
+    elif question == "-1":
+        menu01()
+    else:
+        print("===============================================================Invalid Option====="
+              "==========================================================")
+        input(" " * 58 + "Press enter to continue" + " " * 59)
+        menu013()
+
+def menu013():
     print(dades.cabecera_menu013)
+    removeBBDDPlayer()
+
+
+# Menú 2
+
+def menu02():
+    dejar_este_nivel = False
+    while not dejar_este_nivel:
+        print(dades.cabecera_menu02)
+        textOpts = "1)Set Game Players\n2)Set Card's Deck\n3)Set Max Rounds (Default 5 Rounds)\nS)Go back"
+        inputOptText = "Option: "
+        lista = [1, 2, 3]
+        exceptions = ["S", "s"]
+        opc = getOpt(textOpts, inputOptText, lista, exceptions)
+        if opc == 1:
+            menu021()
+        elif opc == 2:
+            menu022()
+        elif opc == 3:
+            menu023()
+        elif opc in exceptions:
+            dejar_este_nivel = True
+
+# Opciones del menú 2
+
+def showBBDDPlayer():
+    dict_humanos = {}
+    list_dict_h = []
+    dict_robot = {}
+    list_dict_r = []
+    dict_player = {1: dict_robot, 2: dict_humanos}
+    lista = ["g", "Catious", "Moderated", "Bold"]
     mycursor.execute("SELECT human, player_id, player_name, player_risk FROM player")
     myresult = mycursor.fetchall()
     for x in myresult:
@@ -210,7 +272,7 @@ def menu013():
                     raise TypeError(f"{sum}", "hMayor")
                 if isinstance(list_dict_h, list):
                     print(f"{list_dict_r[int(sum)][1]}".ljust(20) + f"{list_dict_r[int(sum)][2]}".ljust(
-                        25) + f"{lista[list_dict_r[int(sum)][3]]}" + "||".rjust(20), end="")
+                        25) + f"{lista[list_dict_r[int(sum)][3]]}".ljust(25) + "||", end="")
                     print("", f"{list_dict_h[int(sum)][1]}".ljust(19), f"{list_dict_h[int(sum)][2]}".ljust(24),
                           f"{lista[list_dict_h[int(sum)][3]]}")
 
@@ -246,48 +308,22 @@ def menu013():
                     sum += 1
                 sum = "a"
 
-    print(dades.asteriscos)
-    question = input("Option ( -id to remove player, -1 to exit): \n")
-    if question[0] == "-" and question[1:] in dict_robot or question[1:] in dict_humanos:
-        question = question[1:]
-        sql = f"DELETE FROM player WHERE player_id = '{question}'"
-        mycursor.execute(sql)
-        mydb.commit()
-        print(mycursor.rowcount, "record(s) deleted")
-    elif question == "-1":
-        menu01()
-    else:
-        print("===============================================================Invalid Option====="
-              "==========================================================")
-        input(" " * 58 + "Press enter to continue" + " " * 59)
-        menu013()
+def showhPlayersGame():
+    print(" " * 40 + "*******************ActualPlayersInGame*******************" + " " * 40)
+    cadena = str()
+    for i in dades.player_seleccionado:
+        cadena = cadena + (' ' * 50 + str(i) + '    ' + dades.player_seleccionado[i].get("Name") + '  ' +
+                           dades.player_seleccionado[i].get("Human") +
+                           '   ' + dades.player_seleccionado[i].get("Profile") + '\n')
+    print(cadena)
 
-# Menú 2
-
-def menu02():
-    dejar_este_nivel = False
-    while not dejar_este_nivel:
-        print(dades.cabecera_menu02)
-        textOpts = "1)Set Game Players\n2)Set Card's Deck\n3)Set Max Rounds (Default 5 Rounds)\nS)Go back"
-        inputOptText = "Option: "
-        lista = [1, 2, 3]
-        exceptions = ["S"]
-        opc = getOpt(textOpts, inputOptText, lista, exceptions)
-        if opc == 1:
-            menu021()
-        elif opc == 2:
-            menu022()
-        elif opc == 3:
-            menu023()
-        elif opc == "S":
-            dejar_este_nivel = True
-
-# Opciones del menú 2
+    input(" " * 58 + "Press enter to continue" + " " * 59)
 
 def menu021():
     print(dades.cabecera_menu021)
 
     if dades.player_seleccionado == {}:
+
         print(" " * 40 + "*******************ActualPlayersInGame*******************" + " " * 40)
         print(" " * 55 + "There is no players in game" + " " * 55)
         input(" " * 60 + "Enter to continue" + " " * 63)
@@ -296,7 +332,6 @@ def menu021():
         dict_humanos = {}
         dict_robot = {}
         lista = ["g", "Catious", "Moderated", "Bold"]
-        print(dades.cabecera_menu013)
         mycursor.execute("SELECT human, player_id, player_name, player_risk FROM player")
         myresult = mycursor.fetchall()
         for x in myresult:
@@ -305,69 +340,72 @@ def menu021():
             elif x[0] == 1:
                 dict_humanos.update({x[1]: {"Name": x[2], "Profile": lista[x[3]]}})
 
-        cadena = str()
-
-        for i in dict_robot:
-            cadena = cadena + (str(i).rjust(9) + "           " + dict_robot[i].get("Name").ljust(25) +
-                               str(dict_robot[i].get("Profile")))
-        print(cadena, end="")
-
-        cadena = str()
-
-        for i in dict_humanos:
-            cadena = cadena + (str(i).rjust(9) + '           ' + dict_humanos[i].get("Name").ljust(25) +
-                               str(dict_humanos[i].get("Profile")) + '\n')
-        print(cadena)
+        showBBDDPlayer()
 
         print(dades.asteriscos)
         question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
                          "-1 to go back:\n")
-        if question in dict_robot or question in dict_humanos:
-            lista = ["g", "Catious", "Moderated", "Bold"]
-            human = ["Human", "Boot"]
-            print(" " * 40 + "*******************ActualPlayersInGame*******************" + " " * 40)
-            mycursor.execute("SELECT player_id, player_name, human, player_risk FROM player")
 
-            myresult = mycursor.fetchall()
+        while question != "-1":
+            if question not in dades.player_seleccionado:
+                if question in dict_robot or question in dict_humanos:
+                    lista = ["g", "Catious", "Moderated", "Bold"]
+                    human = ["Human", "Boot"]
+                    mycursor.execute("SELECT player_id, player_name, human, player_risk FROM player")
 
-            for x in myresult:
-                if x[0] == question:
-                    dades.player_seleccionado.update({x[0]: {"Name": x[1], "Human": human[x[2]], "Profile": lista[x[3]]}})
+                    myresult = mycursor.fetchall()
 
-            cadena = str()
+                    for x in myresult:
+                        if x[0] == question:
+                            dades.player_seleccionado.update({x[0]: {"Name": x[1], "Human": human[x[2]], "Profile": lista[x[3]]}})
 
-            for i in dades.player_seleccionado:
-                cadena = cadena + (' ' * 50 + str(i) + '    ' + dades.player_seleccionado[i].get("Name") + '  ' + dades.player_seleccionado[i].get("Human") +
-                                   '   ' + dades.player_seleccionado[i].get("Profile") + '\n')
-                print(cadena)
-
-            input(" " * 58 + "Press enter to continue" + " " * 59)
-
-        elif question[0] == "-" and question[1:] in dict_robot or question[1:] in dict_humanos:
-            question = question[1:]
-            sql = f"DELETE FROM player WHERE player_id = '{question}'"
-            mycursor.execute(sql)
-            mydb.commit()
-            print(mycursor.rowcount, "record(s) deleted")
-        elif question == "-1":
-            menu02()
+                    showhPlayersGame()
+                    print(dades.cabecera_menu0211)
+                    showBBDDPlayer()
+                    print(dades.asteriscos)
+                    question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                                     "-1 to go back:\n")
+            elif question in dades.player_seleccionado:
+                print("===============================================================Invalid Option====="
+                      "==========================================================")
+                input(" " * 58 + "Press enter to continue" + " " * 59)
+                print(dades.cabecera_menu0211)
+                showBBDDPlayer()
+                print(dades.asteriscos)
+                question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                                 "-1 to go back:\n")
+            elif question[0] == "-" and question[1:] in dict_robot or question[1:] in dict_humanos:
+                question = question[1:]
+                sql = f"DELETE FROM player WHERE player_id = '{question}'"
+                mycursor.execute(sql)
+                mydb.commit()
+                print(mycursor.rowcount, "record(s) deleted")
+                print(dades.cabecera_menu0211)
+                showBBDDPlayer()
+                print(dades.asteriscos)
+                question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                                 "-1 to go back:\n")
+            elif question == "sh":
+                showhPlayersGame()
+                print(dades.cabecera_menu0211)
+                showBBDDPlayer()
+                print(dades.asteriscos)
+                question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                                 "-1 to go back:\n")
+            else:
+                print("===============================================================Invalid Option====="
+                      "==========================================================")
+                input(" " * 58 + "Press enter to continue" + " " * 59)
+                print(dades.cabecera_menu0211)
+                showBBDDPlayer()
+                print(dades.asteriscos)
+                question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                                 "-1 to go back:\n")
         else:
-            print("===============================================================Invalid Option====="
-                  "==========================================================")
-            input(" " * 58 + "Press enter to continue" + " " * 59)
+            menu02()
     else:
 
-        print(" " * 40 + "*******************ActualPlayersInGame*******************" + " " * 40)
-        cadena = str()
-
-        for i in dades.player_seleccionado:
-            cadena = cadena + (
-                        ' ' * 50 + str(i) + '    ' + dades.player_seleccionado[i].get("Name") + '  ' + dades.player_seleccionado[
-                    i].get("Human") +
-                        '   ' + dades.player_seleccionado[i].get("Profile") + '\n')
-            print(cadena)
-
-        input(" " * 58 + "Press enter to continue" + " " * 59)
+        showhPlayersGame()
 
         print(dades.cabecera_menu0211)
 
@@ -383,60 +421,59 @@ def menu021():
             elif x[0] == 1:
                 dict_humanos.update({x[1]: {"Name": x[2], "Profile": lista[x[3]]}})
 
-        cadena = str()
-
-        for i in dict_robot:
-            cadena = cadena + (str(i).rjust(9) + "           " + dict_robot[i].get("Name").ljust(25) +
-                               str(dict_robot[i].get("Profile")))
-        print(cadena, end="")
-
-        cadena = str()
-
-        for i in dict_humanos:
-            cadena = cadena + (str(i).rjust(9) + '           ' + dict_humanos[i].get("Name").ljust(25) +
-                               str(dict_humanos[i].get("Profile")) + '\n')
-        print(cadena)
-
+        showBBDDPlayer()
         print(dades.asteriscos)
         question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
                          "-1 to go back:\n")
-        if question in dict_robot or question in dict_humanos:
-            lista = ["g", "Catious", "Moderated", "Bold"]
-            human = ["Human", "Boot"]
-            print(" " * 40 + "*******************ActualPlayersInGame*******************" + " " * 40)
-            mycursor.execute("SELECT player_id, player_name, human, player_risk FROM player")
+        while question != "-1":
 
-            myresult = mycursor.fetchall()
+            if question in dict_robot or question in dict_humanos:
+                lista = ["g", "Catious", "Moderated", "Bold"]
+                human = ["Human", "Boot"]
+                mycursor.execute("SELECT player_id, player_name, human, player_risk FROM player")
 
-            for x in myresult:
-                if x[0] == question:
-                    dades.player_seleccionado.update(
-                        {x[0]: {"Name": x[1], "Human": human[x[2]], "Profile": lista[x[3]]}})
+                myresult = mycursor.fetchall()
 
-            cadena = str()
+                for x in myresult:
+                    if x[0] == question:
+                        dades.player_seleccionado.update({x[0]: {"Name": x[1], "Human": human[x[2]], "Profile": lista[x[3]]}})
 
-            for i in dades.player_seleccionado:
-                cadena = cadena + (' ' * 50 + str(i) + '    ' + dades.player_seleccionado[i].get("Name") + '  ' +
-                                   dades.player_seleccionado[i].get("Human") +
-                                   '   ' + dades.player_seleccionado[i].get("Profile") + '\n')
-                print(cadena)
+                showhPlayersGame()
+                print(dades.cabecera_menu0211)
+                showBBDDPlayer()
+                print(dades.asteriscos)
+                question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                                 "-1 to go back:\n")
 
-            input(" " * 58 + "Press enter to continue" + " " * 59)
-
-        elif question[0] == "-" and question[1:] in dict_robot or question[1:] in dict_humanos:
-            question = question[1:]
-            sql = f"DELETE FROM player WHERE player_id = '{question}'"
-            mycursor.execute(sql)
-            mydb.commit()
-            print(mycursor.rowcount, "record(s) deleted")
-        elif question == "-1":
-            menu02()
+            elif question[0] == "-" and question[1:] in dict_robot or question[1:] in dict_humanos:
+                question = question[1:]
+                sql = f"DELETE FROM player WHERE player_id = '{question}'"
+                mycursor.execute(sql)
+                mydb.commit()
+                print(mycursor.rowcount, "record(s) deleted")
+                print(dades.cabecera_menu0211)
+                showBBDDPlayer()
+                print(dades.asteriscos)
+                question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                                 "-1 to go back:\n")
+            elif question == "sh":
+                showhPlayersGame()
+                print(dades.cabecera_menu0211)
+                showBBDDPlayer()
+                print(dades.asteriscos)
+                question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                                 "-1 to go back:\n")
+            else:
+                print("===============================================================Invalid Option====="
+                      "==========================================================")
+                input(" " * 58 + "Press enter to continue" + " " * 59)
+                print(dades.cabecera_menu0211)
+                showBBDDPlayer()
+                print(dades.asteriscos)
+                question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                                 "-1 to go back:\n")
         else:
-            print("===============================================================Invalid Option====="
-                  "==========================================================")
-            input(" " * 58 + "Press enter to continue" + " " * 59)
-
-
+            menu02()
 
 def menu022():
     print(dades.cabecera_menu022)

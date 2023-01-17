@@ -192,4 +192,6 @@ player_seleccionado = {}
 
 mazo = ""
 
-max_rondas = 0
+max_rondas = 5
+
+context_game = {}
