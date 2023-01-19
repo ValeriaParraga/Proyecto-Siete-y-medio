@@ -1,9 +1,11 @@
-import time
+# Imports
+
+import random
+from datetime import datetime as dt
 from random import randint
-
 import dades as dades
-
 import mysql.connector
+
 mydb = mysql.connector.connect(
     host="dbvad.mysql.database.azure.com",
     user="GPVAD",
@@ -11,8 +13,8 @@ mydb = mysql.connector.connect(
     database="SAH"
 )
 mycursor = mydb.cursor()
-# Función para la gestión de menús
 
+# Función para la gestión de menús
 def getOpt(textOpts="", inputOptText="", rangeList=[], exceptions=[]):
     print(textOpts)
     while True:
@@ -31,7 +33,6 @@ def getOpt(textOpts="", inputOptText="", rangeList=[], exceptions=[]):
             input("Press enter to continue")
 
 # Menú 0
-
 def menu00():
     dejar_este_nivel = False
     while not dejar_este_nivel:
@@ -54,9 +55,7 @@ def menu00():
         elif opc in exceptions:
             dejar_este_nivel = True
 
-
 # Menú 1
-
 def menu01():
     dejar_este_nivel = False
     while not dejar_este_nivel:
@@ -75,9 +74,19 @@ def menu01():
         elif opc in exceptions:
             dejar_este_nivel = True
 
-# Opciones del menú 1
+# Funciones del menú 1
 
+# Función para añadir a todos los jugadores que se encuentran en la BBDD en el diccionario Players
+def dict_players():
+    mycursor.execute("SELECT player_id, player_name, human, player_risk FROM player")
+    myresult = mycursor.fetchall()
+    lista = [0, 30, 40, 50]
+    lista1 = [False, True]
+    for x in myresult:
+        dades.players[x[0]] = {"name": x[1], "human": lista1[x[2]], "bank": False, "initialCard": "", "priority": 0,
+                               "type": lista[x[3]], "bet": 0, "points": 0, "cards": [], "roundPoints": 0}
 
+# Función que ejecuta el menu011
 def menu011():
     nameOK = False
     DNIOK = False
@@ -122,6 +131,7 @@ def menu011():
                 mycursor.execute(sql, val)
                 mydb.commit()
                 print(mycursor.rowcount, "Record Inserted")
+                dict_players()
                 menu01()
             else:
                 menu01()
@@ -132,12 +142,14 @@ def menu011():
         input("Enter to Continue ")
         menu011()
 
+# Función que devuelve un dni aleatorio para un boot
 def newRandomDNI():
     NUMBER_DNI = randint(10000000, 99999999)
     LETTER_DNI = dades.DNILetras[NUMBER_DNI % 23]
     nif_bot = str(NUMBER_DNI) + str(LETTER_DNI)
     return nif_bot
 
+# Función que ejecuta el menú012
 def menu012():
     nameOK = False
     typeofplayerOK = False
@@ -149,6 +161,12 @@ def menu012():
             raise ValueError("Incorrect name, please, enter a name not empty with only letters")
 
         nif_bot = newRandomDNI()
+        mycursor.execute("SELECT player_id FROM player")
+        myresult = mycursor.fetchall()
+        for x in myresult:
+            if nif_bot == x:
+                nif_bot = newRandomDNI()
+
         print(f"Name:     {name}")
         print(f"DNI:      {nif_bot}")
 
@@ -173,6 +191,7 @@ def menu012():
                 mycursor.execute(sql, val)
                 mydb.commit()
                 print(mycursor.rowcount, "Record Inserted")
+                dict_players()
                 menu01()
             else:
                 menu01()
@@ -183,6 +202,7 @@ def menu012():
         input("Enter to Continue ")
         menu011()
 
+# Función para eliminar a un jugador de la BBDD
 def removeBBDDPlayer():
     dict_humanos = {}
     list_dict_h = []
@@ -218,13 +238,12 @@ def removeBBDDPlayer():
         input(" " * 58 + "Press enter to continue" + " " * 59)
         menu013()
 
+# Función para ejecutar el menú013
 def menu013():
     print(dades.cabecera_menu013)
     removeBBDDPlayer()
 
-
 # Menú 2
-
 def menu02():
     dejar_este_nivel = False
     while not dejar_este_nivel:
@@ -243,8 +262,7 @@ def menu02():
         elif opc in exceptions:
             dejar_este_nivel = True
 
-# Opciones del menú 2
-
+# Función que muestra los jugadores que hay en la BBDD
 def showBBDDPlayer():
     dict_humanos = {}
     list_dict_h = []
@@ -308,6 +326,7 @@ def showBBDDPlayer():
                     sum += 1
                 sum = "a"
 
+# Función que muestra los jugadores actuales seleccionados para jugar
 def showhPlayersGame():
     print(" " * 40 + "*******************ActualPlayersInGame*******************" + " " * 40)
     cadena = str()
@@ -319,6 +338,7 @@ def showhPlayersGame():
 
     input(" " * 58 + "Press enter to continue" + " " * 59)
 
+# Función que ejecuta el menú021
 def menu021():
     print(dades.cabecera_menu021)
 
@@ -350,21 +370,24 @@ def menu021():
             if question not in dades.player_seleccionado:
                 if question in dict_robot or question in dict_humanos:
                     lista = ["g", "Catious", "Moderated", "Bold"]
-                    human = ["Human", "Boot"]
+                    human = ["Boot", "Human"]
                     mycursor.execute("SELECT player_id, player_name, human, player_risk FROM player")
 
                     myresult = mycursor.fetchall()
 
                     for x in myresult:
                         if x[0] == question:
-                            dades.player_seleccionado.update({x[0]: {"Name": x[1], "Human": human[x[2]], "Profile": lista[x[3]]}})
+                            dades.game.append(x[0])
+                            dades.player_seleccionado.update(
+                                {x[0]: {"Name": x[1], "Human": human[x[2]], "Profile": lista[x[3]]}})
 
                     showhPlayersGame()
                     print(dades.cabecera_menu0211)
                     showBBDDPlayer()
                     print(dades.asteriscos)
-                    question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
-                                     "-1 to go back:\n")
+                    question = input(
+                        "Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                        "-1 to go back:\n")
                 elif question[0] == "-" and question[1:] in dict_robot or question[1:] in dict_humanos:
                     question = question[1:]
                     sql = f"DELETE FROM player WHERE player_id = '{question}'"
@@ -443,21 +466,24 @@ def menu021():
             if question not in dades.player_seleccionado:
                 if question in dict_robot or question in dict_humanos:
                     lista = ["g", "Catious", "Moderated", "Bold"]
-                    human = ["Human", "Boot"]
+                    human = ["Boot", "Human"]
                     mycursor.execute("SELECT player_id, player_name, human, player_risk FROM player")
 
                     myresult = mycursor.fetchall()
 
                     for x in myresult:
                         if x[0] == question:
-                            dades.player_seleccionado.update({x[0]: {"Name": x[1], "Human": human[x[2]], "Profile": lista[x[3]]}})
+                            dades.game.append(x[0])
+                            dades.player_seleccionado.update(
+                                {x[0]: {"Name": x[1], "Human": human[x[2]], "Profile": lista[x[3]]}})
 
                     showhPlayersGame()
                     print(dades.cabecera_menu0211)
                     showBBDDPlayer()
                     print(dades.asteriscos)
-                    question = input("Option (id to add to game, -id to remove player, sh to show actual players in game, "
-                                     "-1 to go back:\n")
+                    question = input(
+                        "Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                        "-1 to go back:\n")
                 elif question[0] == "-" and question[1:] in dict_robot or question[1:] in dict_humanos:
                     question = question[1:]
                     sql = f"DELETE FROM player WHERE player_id = '{question}'"
@@ -500,6 +526,7 @@ def menu021():
         else:
             menu02()
 
+# Función que ejecuta el menú022
 def menu022():
     print(dades.cabecera_menu022)
     print("1) ESP - ESP\n2) POK - POK\n0) Go back")
@@ -510,17 +537,17 @@ def menu022():
         if opc == 1:
             print("Established Card Deck ESP, Baraja Española")
             input("Enter to continue " + " " * 59)
-            dades.mazo = "española"
+            dades.context_game["mazo"] = "española"
             menu02()
         elif opc == 2:
             print("Established Card Deck POK, Poker Deck")
             input("Enter to continue " + " " * 59)
-            dades.mazo = "poker"
+            dades.context_game["mazo"] = "poker"
             menu02()
         elif opc == 0:
-            print("Established Card Deck POK, Poker Deck")
+            print("Established Card Deck ESP, Baraja Española")
             input("Enter to continue " + " " * 59)
-            dades.mazo = "poker"
+            dades.context_game["mazo"] = "española"
             menu02()
         else:
             print("===============================================================Invalid Option====="
@@ -533,6 +560,7 @@ def menu022():
         input(" " * 58 + "Press enter to continue" + " " * 59)
         menu022()
 
+# Función que ejecuta el menú023
 def menu023():
     print(dades.cabecera_menu023)
     rondas = input("Max Rounds :")
@@ -554,44 +582,120 @@ def menu023():
         input("Enter to continue ")
         menu023()
 
-# Menú 3
 
+# Función que mezcla la lista con los id's de las cartas. Devuelve barajada las cartas.
+def mezclar_lista(mazo):
+    lista = mazo[:]
+    longitud_lista = len(lista)
+    for i in range(longitud_lista):
+        indice_aleatorio = random.randint(0, longitud_lista - 1)
+        temporal = lista[i]
+        lista[i] = lista[indice_aleatorio]
+        lista[indice_aleatorio] = temporal
+    return lista
+
+# Función principal del proyecto
+def playGame():
+
+    # Se conoce la baraja con la que se va a jugar y se llama a la función que establece la prioridad de cada jugador
+    for i in dades.context_game:
+        if dades.context_game["mazo"] == "española":
+            baraja = mezclar_lista(dades.mazo_espanyola)
+            setGamePriority(baraja)
+        elif dades.context_game["mazo"] == "poker":
+            baraja = mezclar_lista(dades.mazo_poker)
+            setGamePriority(baraja)
+        else:
+            print("deck not detected")
+    # Se llama a la función que resetea los puntos de cada jugador a 20
+    resetPoints()
+
+    # Creamos un id de una partida
+    id_partida = random.randint(1000, 2000)
+
+    #
+
+# Función que resetea los puntos a 20 al inicio de la partida
+def resetPoints():
+    dict_players()
+    for i in dades.game:
+        dades.players[i]["points"] = 20
+
+# Función que ejecuta el menú03
 def menu03():
-    print("El juego")
-
-    if dades.player_seleccionado == {}:
-        print("Set the players that compose the game first")
-        input("Enter to continue ")
-        menu00()
-    elif len(dades.player_seleccionado) < 2:
-        print("Set the players that compose the game first")
-        input("Enter to continue ")
-        menu00()
+    while dades.game != [] and not len(dades.game) < 2 and dades.context_game["mazo"] != " ":
+        print("El juego")
+        playGame()
     else:
-        if dades.mazo == "":
+        if dades.game == []:
+            print("Set the players that compose the game first")
+            input("Enter to continue ")
+            menu00()
+        elif len(dades.player_seleccionado) < 2:
+            print("Set the players that compose the game first")
+            input("Enter to continue ")
+            menu00()
+        elif dades.context_game["mazo"] == " ":
             print("Set the deck of cards first")
             input("Enter to continue ")
             menu00()
-        elif dades.max_rondas == 0:
-            print("Set the max rounds of the game first")
-            input("Enter to continue ")
-            menu00()
-        else:
-            print(dades.cabecera_menu03)
-            print("1)View Stats\n2)View Game Stats\n3)Set Bet\n4)Order Card\n5)Automatic Play\n6)Stand")
-            input("Option: ")
+
+    # crear id de una partida
+    id_partida = random.randint(1000, 2000)
+    print(id_partida)
+
+    # crear diccionarios
+
+    # diccionario cardgame
+
+    num_jugadores = len(dades.game)
+
+    tiempo_actual = actual_hour()
+    tiempo_final = actual_hour()
+
+    cardgame = {"cardgame_id": id_partida, "players": num_jugadores, "start_hour": tiempo_actual,
+                "rounds": dades.context_game["maxRounds"], "end_hour": tiempo_final}
+
+    print(cardgame)
+
+    # diccionario player_game
+
+    for i in dades.game:
+        dades.player_game[id_partida] = {i: {"initial_card_id": dades.players[i]["initialCard"],
+                                             "starting_points": dades.players[i]["points"], "ending_points": 0}}
+    print(dades.player_game)
+
+    # diccionario player_game_round
+
+    for i in dades.game:
+        dades.player_game_round[dades.context_game["round"]] = \
+            {i: {"is_bank": "0 o 1", "bet_points": "apuesta en la ronda",
+                 "starting_round points": "puntos al inicio de la partida",
+                 "cars_value": "puntos obtenidos en la actual ronda",
+                 "ending_round_points": "puntos al final de la ronda"}}
+
+    print(dades.player_game_round)
+
+# Función que establece la prioridad de jugar según la carta
+def setGamePriority(mazo):
+    dict_players()
+    cartas_iniciales = 0
+    for i in dades.players:
+        if i in dades.game:
+            dades.players[i].update({"initialCard": mazo[cartas_iniciales]})
+            cartas_iniciales += 1
+
 
 # Menú 4
-
 def menu04():
     dejar_este_nivel = False
     while not dejar_este_nivel:
         print(dades.cabecera_menu04)
-        textOpts = "1)Players With More Earnings\n2)Players With More Games Played\n3)Players With More Minutes Played"\
+        textOpts = "1)Players With More Earnings\n2)Players With More Games Played\n3)Players With More Minutes Played" \
                    "\nS)Go back"
         inputOptText = "Option: "
         lista = [1, 2, 3]
-        exceptions = ["S"]
+        exceptions = ["S", "s"]
         opc = getOpt(textOpts, inputOptText, lista, exceptions)
         if opc == 1:
             menu041()
@@ -599,17 +703,28 @@ def menu04():
             menu042()
         elif opc == 3:
             menu043()
-        elif opc == "S":
+        elif opc in exceptions:
             dejar_este_nivel = True
+
 
 # Opciones del menú 4
 
 def menu041():
     print("aquí va el ejercicio")
+    # dict_players()
+    # print(dades.players)
+
+
 def menu042():
     print("aquí va el ejercicio")
+    # print(dades.game)
+
+
 def menu043():
     print("aquí va el ejercicio")
+    # resetPoints()
+    # print(dades.players)
+
 
 def menu05():
     dejar_este_nivel = False
@@ -624,7 +739,7 @@ def menu05():
                    "S) Go back"
         inputOptText = "Option: "
         lista = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        exceptions = ["S"]
+        exceptions = ["S", "s"]
         opc = getOpt(textOpts, inputOptText, lista, exceptions)
         if opc == 1:
             menu051()
@@ -646,31 +761,72 @@ def menu05():
             menu059()
         elif opc == 10:
             menu0510()
-        elif opc == "S":
+        elif opc in exceptions:
             dejar_este_nivel = True
+
+
+# Función que devuelve la fecha , la hora, los minutos y segundos actuales
+def actual_hour():
+    time = dt.time(dt.now())
+    date = dt.date(dt.now())
+    tiempo = str(date) + ' ' + str(time.hour) + ':' + str(time.minute) + ':' + str(time.second)
+    return tiempo
+
 
 # Opciones del menú 5
 
 def menu051():
     print("aquí va el ejercicio")
+    sql = "INSERT INTO card (card_id, card_name, card_value, card_priority, card_real_value, deck_id) " \
+          "VALUES (%s, %s, %s, %s, %s, %s)"
+
+    for i in dades.cartas_espanyola:
+        card_id = i
+        literal = dades.cartas_espanyola[i]["literal"]
+        value = dades.cartas_espanyola[i]["value"]
+        priority = dades.cartas_espanyola[i]["priority"]
+        realValue = dades.cartas_espanyola[i]["realValue"]
+
+        val = (card_id, literal, value, priority, realValue, 1)
+        mycursor.execute(sql, val)
+        mydb.commit()
+        print(mycursor.rowcount, "Record Inserted")
+
+
 def menu052():
     print("aquí va el ejercicio")
+    lista = mezclar_lista(dades.mazo_espanyola)
+    setGamePriority(lista)
+
 def menu053():
     print("aquí va el ejercicio")
+
+
 def menu054():
     print("aquí va el ejercicio")
+
+
 def menu055():
     print("aquí va el ejercicio")
+
+
 def menu056():
     print("aquí va el ejercicio")
+
+
 def menu057():
     print("aquí va el ejercicio")
+
+
 def menu058():
     print("aquí va el ejercicio")
+
+
 def menu059():
     print("aquí va el ejercicio")
+
+
 def menu0510():
     print("aquí va el ejercicio")
 
 # Programa
-
