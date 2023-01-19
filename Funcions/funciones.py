@@ -3,7 +3,7 @@
 import random
 from datetime import datetime as dt
 from random import randint
-import dades as dades
+from Funcions import dades as dades
 import mysql.connector
 
 mydb = mysql.connector.connect(
