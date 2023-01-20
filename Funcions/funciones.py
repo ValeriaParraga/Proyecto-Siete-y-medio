@@ -3,7 +3,7 @@
 import random
 from datetime import datetime as dt
 from random import randint
-from Funcions import dades as dades
+import dades as dades
 import mysql.connector
 
 mydb = mysql.connector.connect(
@@ -137,15 +137,15 @@ def menu011():
                 mydb.commit()
                 print(mycursor.rowcount, "Record Inserted")
                 dict_players()
-                menu01()
+                return
             else:
-                menu01()
+                return
         else:
             print("There's an error")
     except ValueError as e:
         print(e)
         input("Enter to Continue ")
-        menu011()
+        return
 
 
 # Función que devuelve un dni aleatorio para un boot
@@ -199,15 +199,15 @@ def menu012():
                 mydb.commit()
                 print(mycursor.rowcount, "Record Inserted")
                 dict_players()
-                menu01()
+                return
             else:
-                menu01()
+                return
         else:
             print("There's an error")
     except ValueError as e:
         print(e)
         input("Enter to Continue ")
-        menu011()
+        return
 
 
 # Función para eliminar a un jugador de la BBDD
@@ -239,12 +239,12 @@ def removeBBDDPlayer():
         mydb.commit()
         print(mycursor.rowcount, "record(s) deleted")
     elif question == "-1":
-        menu01()
+        return
     else:
         print("===============================================================Invalid Option====="
               "==========================================================")
         input(" " * 58 + "Press enter to continue" + " " * 59)
-        menu013()
+        return
 
 
 # Función para ejecutar el menú013
@@ -401,6 +401,17 @@ def menu021():
                     question = input(
                         "Option (id to add to game, -id to remove player, sh to show actual players in game, "
                         "-1 to go back:\n")
+                elif question == "" or question.isspace():
+                    print("===============================================================Invalid Option====="
+                          "==========================================================")
+                    input(" " * 58 + "Press enter to continue" + " " * 59)
+                    print(dades.cabecera_menu0211)
+                    showBBDDPlayer()
+                    print(dades.asteriscos)
+                    question = input(
+                        "Option (id to add to game, -id to remove player, sh to show actual players in game, "
+                        "-1 to go back:\n")
+
                 elif question[0] == "-" and question[1:] in dict_robot or question[1:] in dict_humanos:
                     question = question[1:]
                     sql = f"DELETE FROM player WHERE player_id = '{question}'"
@@ -610,6 +621,26 @@ def mezclar_lista(mazo):
     return lista
 
 
+# Función que establece las apuestas de cada jugador según su perfil
+def setBets():
+    for i in dades.players:
+        if i in dades.game:
+            apuesta = (dades.players[i]["points"] * dades.players[i]["type"] / 100)
+            dades.players[i]["bet"] = apuesta
+
+def standarRound(ident, mazo):
+    mycursor.execute("SELECT human, player_id, player_name from player")
+    resultado = mycursor.fetchall()
+    for ishuman, nif, name in resultado:
+        if ishuman == 1:
+            if nif in ident:
+                dades.players[nif]["cards"].append(mazo.pop())
+                print("dades.players[nif]['cards']", dades.players[nif]["cards"])
+
+# Función que muestra los stats de un jugador humano
+def printPlayerStats(id):
+    print("hola")
+
 # Función principal del proyecto
 def playGame():
     # Se conoce la baraja con la que se va a jugar y se llama a la función que establece la prioridad de cada jugador
@@ -622,15 +653,100 @@ def playGame():
             setGamePriority(baraja)
         else:
             print("deck not detected")
+
     # Se llama a la función que resetea los puntos de cada jugador a 20
     resetPoints()
 
-    # Creamos un id de una partida
-    id_partida = random.randint(1000, 2000)
+    # Creamos e insertamos datos de la partida en el diccionario cardgame generando un id a la partida
 
-    #
+    num_jugadores = len(dades.game)
+    tiempo_actual = actual_hour()
+    tiempo_final = actual_hour()
+    if baraja == "espanyola":
+        deck = "1"
+    elif baraja == "poker":
+        deck = "2"
+    else:
+        deck = "1"
+    sql = "INSERT INTO cardgame (players, rounds, start_hour, end_hour, deck_id) VALUES (%s, %s, %s, %s, %s)"
+    val = (num_jugadores, dades.context_game['maxRounds'], tiempo_actual, tiempo_final, deck)
+    mycursor.execute(sql, val)
+    mydb.commit()
+    mycursor.execute("SELECT cardgame_id, players from cardgame")
+    myresult = mycursor.fetchall()
+    id_lista = []
+    for id_partida, qplayers in myresult:
+        id_lista.append(id_partida)
+        rounds = qplayers
+    cardgame = {"cardgame_id": myresult[-1][1], "players": num_jugadores, "start_hour": tiempo_actual,
+                "rounds": rounds, "end_hour": tiempo_final}
 
+    print("card_game:", cardgame)
 
+    # Creamos e insertamos datos de la partida en el diccionario player_game
+
+    for i in dades.game:
+        dades.player_game.update({i: {"initial_card_id": dades.players[i]["initialCard"],
+                                           "starting_points": dades.players[i]["points"], "ending_points": 0}})
+
+    print("dades.player_game", dades.player_game)
+
+    # Creamos e insertamos datos de la partida en el diccionario player_game_round
+
+    for i in dades.players:
+        if i in dades.game:
+            if dades.players[i]["bank"] is True:
+                dades.player_game_round[dades.context_game["round"]] = \
+                    {i: {"is_bank": 1, "bet_points": "apuesta en la ronda",
+                         "starting_round points": dades.players[i]["points"],
+                         "cars_value": "puntos obtenidos en la actual ronda",
+                         "ending_round_points": "puntos al final de la ronda"}}
+            else:
+                dades.player_game_round[dades.context_game["round"]] = \
+                    {i: {"is_bank": 0, "bet_points": "apuesta en la ronda",
+                         "starting_round points": dades.players[i]["points"],
+                         "cars_value": "puntos obtenidos en la actual ronda",
+                         "ending_round_points": "puntos al final de la ronda"}}
+
+    print("dades.player_game_round", dades.player_game_round)
+
+    # La partida comienza mientras haya mínimo dos jugadores y no se superen las rondas máximas
+
+    while checkMinimun2PlayerWithPoints() is True and dades.context_game["round"] <= dades.context_game["maxRounds"]:
+        mycursor.execute("SELECT human, player_id, player_name from player")
+        resultado = mycursor.fetchall()
+
+        for ishuman, DNI, name in resultado:
+            if ishuman == 1:
+                if DNI in dades.game:
+                    humanRound(dades.game, baraja)
+    else:
+        print("se acabó el juego, poner el ganador")
+
+# Esta función imprime los stats de todos los jugadores de la partida
+def printStats(idPlayer="", titulo=""):
+    print("hola")
+
+# Función que gestiona la tirada de un jugador humano. Muestra el menú de opciones
+def humanRound(id, mazo):
+    textOpts = "1)View Stats\n2)View Game Stats\n3)Set Bet\n4)Order Card\n5)Automatic Play\nS)Stand"
+    inputOptText = "Option: "
+    lista = [1, 2, 3, 4, 5]
+    exceptions = ["S", "s"]
+    opc = getOpt(textOpts, inputOptText, lista, exceptions)
+    if opc == 1:
+        printPlayerStats(id)
+    elif opc == 2:
+        printStats(idPlayer=id, titulo="*" * 40 + f"Round {dades.context_game['round']}, "
+                                                  f"Turn of {dades.players[id]['name']}" + "*" * 40)
+    elif opc == 3:
+        print("set bet")
+    elif opc == 4:
+        standarRound(id, mazo)
+    elif opc == 5:
+        print("automatic play")
+    elif opc in exceptions:
+        print("stand")
 # Función que resetea los puntos a 20 al inicio de la partida
 def resetPoints():
     dict_players()
@@ -657,41 +773,18 @@ def menu03():
             input("Enter to continue ")
             menu00()
 
-    # crear id de una partida
-    id_partida = random.randint(1000, 2000)
-    print(id_partida)
 
-    # crear diccionarios
-
-    # diccionario cardgame
-
-    num_jugadores = len(dades.game)
-
-    tiempo_actual = actual_hour()
-    tiempo_final = actual_hour()
-
-    cardgame = {"cardgame_id": id_partida, "players": num_jugadores, "start_hour": tiempo_actual,
-                "rounds": dades.context_game["maxRounds"], "end_hour": tiempo_final}
-
-    print(cardgame)
-
-    # diccionario player_game
-
-    for i in dades.game:
-        dades.player_game[id_partida] = {i: {"initial_card_id": dades.players[i]["initialCard"],
-                                             "starting_points": dades.players[i]["points"], "ending_points": 0}}
-    print(dades.player_game)
-
-    # diccionario player_game_round
-
-    for i in dades.game:
-        dades.player_game_round[dades.context_game["round"]] = \
-            {i: {"is_bank": "0 o 1", "bet_points": "apuesta en la ronda",
-                 "starting_round points": "puntos al inicio de la partida",
-                 "cars_value": "puntos obtenidos en la actual ronda",
-                 "ending_round_points": "puntos al final de la ronda"}}
-
-    print(dades.player_game_round)
+# Función que comprueba que mínimo hayan dos personas con puntos para que continue el juego
+def checkMinimun2PlayerWithPoints():
+    min = 0
+    for i in dades.players:
+        if i in dades.game:
+            if dades.players[i]["points"] > 0:
+                min += 1
+    if min >= 2:
+        return True
+    else:
+        return False
 
 
 # Función que establece la prioridad de jugar según la carta
@@ -702,6 +795,60 @@ def setGamePriority(mazo):
         if i in dades.game:
             dades.players[i].update({"initialCard": mazo[cartas_iniciales]})
             cartas_iniciales += 1
+
+    baraja = dades.context_game["mazo"]
+
+    dict_primera_carta = {}
+
+    if baraja == "española":
+        for i in dades.players:
+            if i in dades.game:
+                carta_guardada = dades.players[i].get("initialCard")
+                for j in dades.cartas_espanyola:
+                    if carta_guardada == j:
+                        dict_primera_carta.update({i: (dades.cartas_espanyola[j].get("value") * 10 +
+                                                       dades.cartas_espanyola[j].get("priority"))})
+
+        o_dict_primera_carta = dict(sorted(dict_primera_carta.items(), key=lambda item: item[1]))
+
+        n = 1
+        for i in o_dict_primera_carta:
+            o_dict_primera_carta[i] = n
+            dades.players[i]["priority"] = n
+            dades.game[n - 1] = i
+            n = n + 1
+
+        for i in dades.players:
+            if i == dades.game[-1]:
+                dades.players[i]["bank"] = True
+
+        print(dades.game)
+        print(dades.players)
+
+    elif baraja == "poker":
+        for i in dades.players:
+            if i in dades.game:
+                carta_guardada = dades.players[i].get("initialCard")
+                for j in dades.cartas_poker:
+                    if carta_guardada == j:
+                        dict_primera_carta.update({i: (dades.cartas_poker[j].get("value") * 10 +
+                                                       dades.cartas_poker[j].get("priority"))})
+
+        o_dict_primera_carta = dict(sorted(dict_primera_carta.items(), key=lambda item: item[1]))
+
+        n = 1
+        for i in o_dict_primera_carta:
+            o_dict_primera_carta[i] = n
+            dades.players[i]["priority"] = n
+            dades.game[n - 1] = i
+            n = n + 1
+
+        for i in dades.players:
+            if i == dades.game[-1]:
+                dades.players[i]["bank"] = True
+
+        print(dades.game)
+        print(dades.players)
 
 
 # Menú 4
@@ -795,20 +942,20 @@ def actual_hour():
 
 def menu051():
     print("aquí va el ejercicio")
-    sql = "INSERT INTO card (card_id, card_name, card_value, card_priority, card_real_value, deck_id) " \
-          "VALUES (%s, %s, %s, %s, %s, %s)"
-
-    for i in dades.cartas_espanyola:
-        card_id = i
-        literal = dades.cartas_espanyola[i]["literal"]
-        value = dades.cartas_espanyola[i]["value"]
-        priority = dades.cartas_espanyola[i]["priority"]
-        realValue = dades.cartas_espanyola[i]["realValue"]
-
-        val = (card_id, literal, value, priority, realValue, 1)
-        mycursor.execute(sql, val)
-        mydb.commit()
-        print(mycursor.rowcount, "Record Inserted")
+    # sql = "INSERT INTO card (card_id, card_name, card_value, card_priority, card_real_value, deck_id) " \
+    #       "VALUES (%s, %s, %s, %s, %s, %s)"
+    #
+    # for i in dades.cartas_espanyola:
+    #     card_id = i
+    #     literal = dades.cartas_espanyola[i]["literal"]
+    #     value = dades.cartas_espanyola[i]["value"]
+    #     priority = dades.cartas_espanyola[i]["priority"]
+    #     realValue = dades.cartas_espanyola[i]["realValue"]
+    #
+    #     val = (card_id, literal, value, priority, realValue, 1)
+    #     mycursor.execute(sql, val)
+    #     mydb.commit()
+    #     print(mycursor.rowcount, "Record Inserted")
 
 
 def menu052():
