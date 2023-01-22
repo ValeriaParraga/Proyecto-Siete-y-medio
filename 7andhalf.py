@@ -1,4 +1,4 @@
-import Funcions.funciones as funcions
+import Funcions.funcions as funcions
 
 # Programa
 

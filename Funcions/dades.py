@@ -1,4 +1,4 @@
-# Cabeceras de los menÃºs
+# Cabeceras de los menus
 
 menuS = "*" * 140
 menu00 = "\n                                      _____                         ___              __   __  __      ______\n \
@@ -176,6 +176,25 @@ menu03 = '''                                     _____                         _
 
 cabecera_menu03 = cab1 + menu03
 
+
+cab1 = "*********************************************************************************************************" \
+       "***********************************\n"
+
+menu03finish = '''                     .d8888b.                                      .d88888b.
+                    d88P  Y88b                                    d88P" "Y88b
+                    888    888                                    888     888
+                    888         8888b.  88888b.d88b.   .d88b.     888     888 888  888  .d88b.  888d888
+                    888  88888     "88b 888 "888 "88b d8P  Y8b    888     888 888  888 d8P  Y8b 888P"
+                    888    888 .d888888 888  888  888 88888888    888     888 Y88  88P 88888888 888
+                    Y88b  d88P 888  888 888  888  888 Y8b.        Y88b. .d88P  Y8bd8P  Y8b.     888
+                     "Y8888P88 "Y888888 888  888  888  "Y8888      "Y88888P"    Y88P    "Y8888  888\n'''
+
+
+cab3 = "*******************************************************************************************************" \
+       "*************************************"
+
+menu03game_over = cab1 + menu03finish + cab3
+
 # Otros
 
 DNILetras = ["T", "R", "W", "A", "G", "M", "Y", "F", "P", "D", "X", "B", "N", "J", "Z", "S", "Q", "V", "H", "L", "C",
@@ -183,19 +202,51 @@ DNILetras = ["T", "R", "W", "A", "G", "M", "Y", "F", "P", "D", "X", "B", "N", "J
 
 player_seleccionado = {}
 
-context_game = {"maxRounds": 5, "round": 0, "mazo": " "}
+context_game = {"maxRounds": 5, "round": 1, "mazo": " "}
+
+cab1 = f"***********************************************************  STATS AFTER ROUND {context_game['round']} **********" \
+       f"*************************************************\n"
+menu03res ='''                                     _____                         ___              __   __  __      ______
+                                    / ___/___ _   _____  ____     /   |  ____  ____/ /  / / / /___ _/ / __/
+                                    \__ \/ _ \ | / / _ \/ __ \   / /| | / __ \/ __  /  / /_/ / __ `/ / /_
+                                   ___/ /  __/ |/ /  __/ / / /  / ___ |/ / / / /_/ /  / __  / /_/ / / __/
+                                  /____/\___/|___/\___/_/ /_/  /_/  |_/_/ /_/\__,_/  /_/ /_/\__,_/_/_/\n'''
+
+cab3 = "*********************************************************************************************************" \
+       "***********************************"
+
+cabecera_menu03resultado = cab1 + menu03res + cab3
+
+cartas_totales = []
+
+automatic = False
+
+num_jugadores = 0
+
+
+rounds = 0
+
+deck = 0
 
 players = {}
 
 game = []
 
+baraja = []
+
 mazo_espanyola = []
 
 mazo_poker = []
 
+cardgame = {}
+
 player_game = {}
 
 player_game_round = {}
+
+print_resultado_ronda = 'no'
+
+playerPTS = {}
 
 # Diccionarios
 
@@ -252,8 +303,6 @@ cartas_espanyola = {
     "B11": {"literal": "Caballo de Bastos", "value": 11, "priority": 1, "realValue": 0.5},
     "B12": {"literal": "Rey de Bastos", "value": 12, "priority": 1, "realValue": 0.5},
 }
-
-
 
 for i in cartas_espanyola:
     mazo_espanyola.append(i)
@@ -318,21 +367,3 @@ cartas_poker = {
 
 for i in cartas_poker:
     mazo_poker.append(i)
-
-# Diccionarios para la inserción de datos en BBDD
-
-cardgame = {}
-
-'''player_game = {id_game:{id_player_1:{initial_card_id:”card id”, starting_points:”puntos al
-inicio”, ending_points:”puntos al final de partida},…,id_player_n:{initial_card_id:”card id”,
-starting_points:”puntos al inicio”, ending_points:”puntos al final de partida}}”
-
-player_game_round = {round:{id_player_1:{is_bank:”0 ó 1”,bet_points:”apuesta en la
-ronda”,starting_round_points:”puntos al inicio de la partida,cards_value:”puntos
-obtenido en la actual ronda”,endind_round_points:”puntos al final de la
-ronda”},…,{id_player_n:{is_bank:”0 ó 1”,bet_points:”apuesta en la
-ronda”,starting_round_points:”puntos al inicio de la partida,cards_value:”puntos
-obtenido en la actual ronda”,endind_round_points:”puntos al final de la ronda”}'''
-
-
-mazo_seleccionado = {0: cartas_poker, 1: cartas_espanyola}
