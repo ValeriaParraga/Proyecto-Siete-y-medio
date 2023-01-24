@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+        <link href="documentacion.css" rel="stylesheet" />
+        <script src="shadowPartial.js"></script>
+        <title>7 y medio</title>
+    </head>
+    <body>
+        <div>
+            <div class="todo">
+                <div>
+                    <img src="logo7ymedio.png" alt="logo" height="90px" width="90px">
+                    <h1 class="titulo">7 y medio</h1>
+    
+                </div>
+            </div>
+        </div>
+        <div> <!--BASE-->
+
+            <div class="cabecera"> <!--CABECERA-->
+               <ul>
+                <li>
+                    <a href="index.html">Índice</a>
+                </li>
+                <li>
+                    <a href="tutorial.html">Tutorial</a>
+                </li>
+                <li>
+                    <a href="equipos.html">Equipo</a>
+                </li>
+                <li>
+                    <a href="documentacion.html">Documentación</a>
+                </li>
+               </ul>
+            </div>
+
+            <div class="contenido"> <!--CONTENIDO-->
+                <div>
+                    <h1>DOCUMENTACIÓN</h1>
+                </div>
+                <div class="documentacion">
+                    <p class="texto">
+                        <h3>➔ Lógica de juego de la banca</h3>
+                        <br>
+                        <p>Cada jugador compite contra la banca. Para ganar la apuesta, cada jugador ha de intentar sumar siete y medio o el
+                            número más cercano sin pasarse de esta cantidad superando a la banca.</p>
+            
+                        <p>Cuando todos han acabado de escoger cartas, juega la banca, si la banca no se
+                            pasa, se compara la puntuación de la banca con la de cada jugador.
+                            <br>
+                            <br>
+                            <div>
+                                ● Si el jugador tiene igual de puntos o menos que la banca, paga lo
+                                apostado a la banca.
+                                <br>
+                                ● Si el jugador se ha pasado, igualmente paga lo apostado a la banca.
+                                <br>
+                                ● Si el jugador tiene siete y medio y la banca no, gana el doble de lo
+                                apostado y pasará a ser uno de los candidatos a la banca.
+                                <br>
+                                ● En caso de no tener siete y medio, pero tener más puntos que la banca, la
+                                banca le paga lo apostado</p>
+
+                            </div>
+                        <p>
+                            Si la banca se pasa, pagará a todos los jugadores que no se hayan pasado, lo que
+                            hayan apostado. <br> <br>
+                            ● El jugador que pierde todos sus puntos, queda eliminado de la partida. Los otros
+                            pueden seguir jugando más rondas. <br>
+                            ● Una vez realizado los pagos, si la banca no ha sacado siete y medio, y hay
+                            candidatos a la banca, el jugador con más prioridad de entre los candidatos,
+                            pasará a ser la nueva banca. <br>
+                            ● En caso de quedar eliminada la banca, si no hay candidatos a la banca, el jugador
+                            con más prioridad pasará a ser la nueva banca. <br>
+                            ● El jugador ganador es el que más puntos ha obtenido después de todas las
+                            rondas jugadas.
+                        </p>
+                        <br>
+                    </p>
+
+                    <p>
+                        <h3>➔ Lógica del juego de un boot.</h3>
+                        <br>
+                        <p>
+                            La logica del bot es la siguiente:
+                            <br><br>
+                            ● depende de si es banca o no
+                            <br><br>
+                            ● depende de si supera su riesgo o no
+                            <br><br>
+                            ● si esta por debajo de su riesgo, ( que es un %), se piden cartas hasta que el % de la posibilidad de que salga una carta que se pase del 7 y medio sea igual o superior al % del tipo de jugador
+                            <br><br>
+                            ● si es banca, tendrá en cuenta las cartas que tienen el resto de jugadores, si los otros jugadores se pasan de 7 y medio, solo pedirá 1 carta
+                        </p>
+                        <br>
+                    </p>
+
+                    <p>
+                        <h3>➔ Establecimiento de la prioridad inicial de los jugadores</h3>
+                        <br>
+                        <p>El número de jugadores debe estar entre 2 y 6.
+                            <br><br>
+                            ● Se jugará un máximo de 30 manos.
+                            <br><br>
+                            ● Cada jugador inicia la partida con 20 puntos.
+                            <br><br>
+                            ● Inicialmente, se reparte una carta a cada jugador, que establecerá las
+                            prioridades de cada uno.
+                            Una vez establecidas las prioridades, se devuelven las cartas al mazo. Se
+                            establecen las apuestas de cada jugador.
+                            <br><br>
+                            ● Seguidamente, el programa reparte una carta a cada jugador y comienza la
+                            primera ronda. Cada jugador decide si quiere recibir más cartas del mazo. Si no
+                            quiere más cartas, se planta. Puede pedir tantas cartas del mazo como crea
+                            conveniente y se puede plantar cuando quiera.
+                            <br><br>
+                            El jugador que pierde todos sus puntos, queda eliminado de la partida. Los otros
+                            pueden seguir jugando más rondas.
+                        </p>
+                        <br>
+                    </p>
+
+                    <p>
+                        <h3>➔ Inserción en BBDD de las tablas cardgame, player_game,
+                            player_round_game.</h3>
+                        <br>
+                        <p>
+                            Es una funcion que recibe los parametros "clave :valor" que debe de contener el diccionario "cardgame" y una 
+                            vez los almacena hace un "insert"
+                            de estos valores en la base de datos cardgame 
+                        </p>
+                        <br>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+

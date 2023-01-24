@@ -1,0 +1,178 @@
+body {
+    font-family: "Open Sans", sans-serif;
+    margin: 0;
+    user-select: none;
+    background-color: azure;
+    background-image: url(lineasfondo.png);
+}
+
+.titulo {
+    color: white;
+    margin: 0px;
+}
+
+.todo {
+    width: 100%;
+    background: rgb(38, 47, 61);
+    text-align: center;
+    list-style-type: none;
+}
+
+.cabecera ul{
+    list-style-type: none;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    margin: 0px;
+}
+
+li {
+    display: block;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.cabecera li {
+    float: left;
+}
+
+.cabecera li a {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+}
+
+.cabecera li a:hover {
+    background-color: rgba(133, 118, 118, 0.3);
+    border-radius: 20px;
+}
+
+.cabecera {
+    background-color: black;
+    width: 100%;
+}
+
+.contenido {
+    margin: auto;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+}
+
+@media only screen and (max-width: 768px) {
+    .contenido { 
+        width: auto;
+        padding: 16px 16px;
+    }
+}
+
+.contenido h1 {
+    text-align: center;
+}
+
+.contenido h4 {
+    text-align: center;
+}
+
+.Box1, .Box2, .Box3 {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+@media only screen and (max-width: 768px) {
+    .Box1, .Box3 { 
+        flex-direction: column;
+        width: auto;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .Box2 { 
+        flex-direction: column-reverse;
+        width: auto;
+    }
+}
+
+.texto1, .texto3 {
+    width: 60%;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.texto2 {
+    text-align: right;
+    margin: 0px 0px 0px 30px;
+}
+
+@media only screen and (max-width: 768px) {
+    .texto1, .texto2, .texto3 { 
+        width: auto;
+        text-align: center;
+        margin-right: auto;
+        margin-left: auto;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    h3 { 
+        width: auto;
+        text-align: center;
+        margin: 25px 25px;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .img1 {
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+        display: flex;
+        justify-content: center;
+    }
+    .img1 div img {
+        width: 80%;
+        height: auto;
+
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .img2 {
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+        display: flex;
+        justify-content: center;
+    }
+    .img2 div img {
+        width: 80%;
+        height: auto;
+
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .img3 {
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+        display: flex;
+        justify-content: center;
+        flex-direction: column-reverse;
+    }
+    .img3 div img {
+        width: 80%;
+        height: auto;
+
+    }
+}
+
+img:hover {
+    -webkit-transform:scale(1.1);
+    transform:scale(1.1);
+    transition: all .5s ease-in-out;
+}

@@ -16,10 +16,6 @@ body {
     background: rgb(38, 47, 61);
     text-align: center;
     list-style-type: none;
-    width: 100%;
-    justify-content: center;
-    background: rgb(26, 33, 43);
-    text-align: center;
 }
 
 .cabecera ul{
@@ -31,9 +27,14 @@ body {
     margin: 0px;
 }
 
+li {
+    display: block;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
 .cabecera li {
     float: left;
-    border-radius: 15%;
 }
 
 .cabecera li a {
@@ -54,116 +55,61 @@ body {
 
 .contenido {
     margin: auto;
-    max-width: 900px;
+    max-width: 800px;
     display: flex;
     flex-direction: column;
-    width: 70vw;
-    margin-left: auto;
-    margin-right: auto;
+    position: sticky;
+    top: 0;
 }
 
-.cartas {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-}
-
-@media only screen and (max-width: 900px) {
-    .cartas { 
-        flex-direction: column;
+@media only screen and (max-width: 768px) {
+    .contenido { 
         width: auto;
-        height: fit-content;
-
+        padding: 16px 16px;
     }
 }
 
-
-.texto {
-    width: 40%;
+.contenido h1 {
+    text-align: center;
 }
 
+p {
+    margin: 0px;
+}
+
+h4 {
+    margin: 0px;
+}
+
+.texto{
+    vertical-align: middle;
+    float: right;
+    margin: 0px;
+}
 
 @media only screen and (max-width: 768px) {
-    .decoracion { 
-        width: 100%;
+    img {
         margin-left: auto;
         margin-right: auto;
-    }
-}
-
-
-ol {
-    counter-reset: item;
-    padding-inline-start: 0px;
-}
-
-ol p {
-    width: 60%;
-}
-
-
-
-.punto li {
-    width: 70%;
-}
-
-li {
-    display: block;
-    margin-top: auto;
-    margin-bottom: auto;
-}
-
-.contenido li::before {
-    content: counters(item, ".") " ";
-    counter-increment: item;
-    font-weight: bold;
-    color: coral;
-}
-
-.contenido ol li::marker {
-    font-weight: bold;
-}
-
-.contenido ol li {
-    counter-increment: li;
-    display: list-item;
-}
-
-.contenido ol li::marker {
-    font-weight: bold;
-    display: list-item;
-    content: "#" ""; 
-    color: coral;
-    font-weight: bold;
-    justify-content: center;
-}
-
-body {
-    counter-reset: li;
-    line-height: 1.4;
-}
-
-@media only screen and (max-width: 700px){
-    .centrado{
-        margin-left: auto;
-        margin-right: auto;
+        display: flex;
     }
 }
 
 @media only screen and (max-width: 768px) {
-    .texto { 
+    h3 {
+        text-align: center;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .texto {
         width: auto;
         text-align: center;
-
     }
-    ol p {
-        margin-left: auto;
-        margin-right: auto;
-    }
-    li {
-        width: fit-content;
-        margin-left: auto;
-        margin-right: auto;
+    .valeria {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
     }
 }
 
@@ -175,6 +121,7 @@ img:hover {
 
 .animacion {
     animation: rotation 2s linear;
+    text-align: center;
 }
 
 @keyframes rotation {
@@ -182,7 +129,7 @@ img:hover {
       transform: rotate(0deg);
     }
     to {
-      transform: rotate(160deg);
+      transform: rotate(360deg);
     }
 }
 
@@ -200,5 +147,3 @@ img:hover {
         }
     }
 }
-
-

@@ -1,0 +1,90 @@
+body {
+    font-family: "Open Sans", sans-serif;
+    margin: 0;
+    user-select: none;
+    background-color: azure;
+    background-image: url(lineasfondo.png);
+}
+
+
+.titulo {
+    color: white;
+    margin: 0px;
+}
+
+.todo {
+    width: 100%;
+    background: rgb(38, 47, 61);
+    text-align: center;
+    list-style-type: none;
+}
+
+.cabecera ul{
+    list-style-type: none;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    margin: 0px;
+}
+
+li {
+    display: block;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.cabecera li {
+    float: left;
+}
+
+.cabecera li a {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+}
+
+.cabecera li a:hover {
+    background-color: rgba(133, 118, 118, 0.3);
+    border-radius: 20px;
+}
+
+.cabecera {
+    background-color: black;
+    width: 100%;
+}
+
+.contenido {
+    margin: auto;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+}
+
+@media only screen and (max-width: 768px) {
+    .contenido { 
+        width: auto;
+        padding: 16px 16px;
+    }
+}
+
+.contenido h1 {
+    text-align: center;
+}
+
+img:hover {
+    -webkit-transform:scale(1.1);
+    transform:scale(1.1);
+    transition: all .5s ease-in-out;
+}
+
+@media only screen and (max-width: 768px) {
+    .documentacion {
+        width: auto;
+        text-align: center;
+        margin-right: auto;
+        margin-left: auto;
+    }
+}
