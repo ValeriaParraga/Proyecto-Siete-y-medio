@@ -92,6 +92,7 @@ def dict_players():
 
 # Función que ejecuta el menu011
 def menu011():
+    print(dades.cabecera_menu011)
     nameOK = False
     DNIOK = False
     typeofplayerOK = False
@@ -156,6 +157,7 @@ def newRandomDNI():
 
 # Función que ejecuta el menú012
 def menu012():
+    print(dades.cabecera_menu012)
     nameOK = False
     typeofplayerOK = False
     try:
@@ -334,7 +336,6 @@ def showBBDDPlayer():
                         25) + f"{lista[list_dict_r[int(sum)][3]]}".ljust(25) + "||")
                     sum += 1
                 sum = "a"
-
 
 # Función que muestra los jugadores actuales seleccionados para jugar
 def showhPlayersGame():
@@ -628,11 +629,35 @@ def setBets():
             apuesta = (dades.players[i]["points"] * dades.players[i]["type"] / 100)
             dades.players[i]["bet"] = math.ceil(apuesta)
 
+# Función que limpia las cartas para una nueva ronda
+def clearCards():
+    for i in dades.game:
+        dades.players[i]["cards"].clear()
+
+# Función que calcula si pide una carta la banca
+def bankOrderNewCard(ident,isbank):
+    if isbank is True:
+        checkIfExeeds = 0
+        for i in range(len(dades.playerPTS)-1):
+            if dades.playerPTS[list(dades.playerPTS.keys())[i]]["roundPoints"] > 7.5:
+                checkIfExeeds += 1
+        if checkIfExeeds == len(dades.playerPTS.keys())-1:
+            pickCard(ident, dades.baraja)
+            return
+        while calculateRisk(ident) <= dades.players[ident]['type']:
+            if dades.players[ident]["roundPoints"] < 7.5:
+                pickCard(ident, dades.baraja)
+            else:
+                return
+
 # Función que calcula el riesgo de pasarse de 7.5 puntos para los bots
 def calculateRisk(ident):
     rest = 0
     r = 0
-    d = dades.cartas_espanyola.copy()
+    if dades.context_game["mazo"] == "española":
+        d = dades.cartas_espanyola.copy()
+    elif dades.context_game["mazo"] == "poker":
+        d = dades.cartas_poker.copy()
     for i in dades.cartas_totales:
         if i in dades.players[ident]["cards"] and i not in dades.cartas_totales:
             r += d[i]["realValue"]
@@ -653,12 +678,18 @@ def calculateRisk(ident):
             rest = rest + 1
         else:
             rest += 1
-    risk = ac / rest * 100
-    return risk
+    try:
+        risk = ac / rest * 100
+        return risk
+    except Exception:
+        print("out of cards")
+        risk = 0
+        return risk
 
 # Función que reparte una carta a un humano que la pide
 def pickCard(ident,mazo):
-    if dades.players[ident].get("human") is True:
+
+    if dades.players[ident].get("human") is True and dades.automatic is False:
         eCard = mazo.pop()
         dades.cartas_totales.append(eCard)
         dades.players[ident]["cards"].append(eCard)
@@ -677,7 +708,7 @@ def pickCard(ident,mazo):
         dades.players[ident]["roundPoints"] = pts
         input("\nEnter to continue: ")
         return
-    elif dades.players[ident]["human"] is False:
+    elif dades.players[ident]["human"] is False or (dades.players[ident]["human"] is True and dades.automatic is True):
         eCard = mazo.pop()
         dades.cartas_totales.append(eCard)
         dades.players[ident]["cards"].append(eCard)
@@ -709,18 +740,19 @@ def standarRound(ident, mazo):
             pickCard(ident, mazo)
 
     elif dades.players[ident].get('human') is True and dades.automatic is True:
-        while calculateRisk(ident) <= dades.players[ident]['type']:
+        while calculateRisk(ident) < dades.players[ident]['type']:
             if dades.players[ident]["roundPoints"] < 7.5:
                 pickCard(ident, mazo)
             else:
                 return
-
+        return
     elif dades.players[ident].get("human") is False:
-        while calculateRisk(ident) <= dades.players[ident]['type']:
+        while calculateRisk(ident) < dades.players[ident]['type']:
             if dades.players[ident]["roundPoints"] < 7.5:
                 pickCard(ident, mazo)
             else:
                 return
+        return
 
 # Función que muestra los stats de un jugador humano
 def printPlayerStats(id):
@@ -730,11 +762,16 @@ def printPlayerStats(id):
           f"human          {dades.players[id]['human']}\n"
           f"bank           {dades.players[id]['bank']}\ninitialCard    {dades.players[id]['initialCard']}\n"
           f"priority       {dades.players[id]['priority']}\nbet            {dades.players[id]['bet']}\n"
-          f"points         {dades.players[id]['points']}\n"
-          f"cards          {dades.players[id]['cards']}\nroundPoints    {dades.players[id]['roundPoints']}")
+          f"points         {dades.players[id]['points']}")
+    print(f"cards          {printCards(id)}\nroundPoints", end='    ')
+    print(f"{dades.players[id]['roundPoints']}")
 
     return
-
+def printCards(ident):
+    linea = ''
+    for i in dades.players[ident]['cards']:
+        linea += i + " "
+    return linea
 # Función que imprime los stats de todos los jugadores de la partida
 def printStats(titulo=""):
     if dades.print_resultado_ronda == 'no':
@@ -781,7 +818,7 @@ def printStats(titulo=""):
     for id in dades.game:
         posicion = posicion + 1
         if posicion < 4:
-            print(f"{dades.players[id]['cards']}".ljust(30), end='        ')
+            print(f"{printCards(id)}".ljust(30), end='        ')
     posicion = 0
     print("\n""Roundpoints".ljust(11), end='   ')
     for id in dades.game:
@@ -832,7 +869,7 @@ def printStats(titulo=""):
         for id in dades.game:
             posicion = posicion + 1
             if posicion >= 4:
-                print(f"{dades.players[id]['cards']}".ljust(30), end='        ')
+                print(f"{printCards(id)}".ljust(30), end='        ')
         posicion = 0
         print("\n""Roundpoints".ljust(11), end='   ')
         for id in dades.game:
@@ -886,6 +923,7 @@ def humanRound(id, mazo):
             standarRound(id, dades.baraja)
             printStats(titulo="*" * 60 + f"Round {dades.context_game['round']}, "
                                          f"Turn of {dades.players[id]['name']}" + "*" * 60)
+            return
         elif opc in exceptions:
             dejar_este_nivel = True
 
@@ -946,15 +984,19 @@ def playGame():
     # Se llama a la función que resetea los puntos de cada jugador a 20
     resetPoints()
     # Se establecen las apuestas según el perfil de cada jugador
-    setBets()
+
 
     # La partida comienza mientras haya mínimo dos jugadores y no se superen las rondas máximas
     while checkMinimun2PlayerWithPoints() is True and dades.context_game["round"] <= dades.context_game["maxRounds"]:
-
         dades.print_resultado_ronda = 'no'
-
         # Empiezan a jugar según prioridad
         for i in dades.game:
+            setBets()
+            if dades.context_game["mazo"] == "española":
+                dades.baraja = mezclar_lista(dades.mazo_espanyola)
+            elif dades.context_game["mazo"] == "poker":
+                dades.baraja = mezclar_lista(dades.mazo_poker)
+            dades.nif_starting_points.update({i:dades.players[i]["points"]})
             if dades.players[i]['human'] is True:
                 humanRound(i, dades.baraja)
             elif dades.players[i]['human'] is False and dades.players[i]['bank'] is False:
@@ -962,50 +1004,113 @@ def playGame():
                 printStats(titulo="*" * 60 + f"Round {dades.context_game['round']}, "
                                              f"Turn of {dades.players[i]['name']}" + "*" * 60)
             elif dades.players[i]['human'] is False and dades.players[i]['bank'] is True:
-                standarRound(i, dades.baraja)
-                print("PONER FUNCIÓN QUE HAGA LO QUE HARÍA LA BANCA")
+                bankOrderNewCard(i, dades.players[i]['bank'])
                 printStats(titulo="*" * 60 + f"Round {dades.context_game['round']}, "
                                              f"Turn of {dades.players[i]['name']}" + "*" * 60)
 
-        # Sumamos las rondas finalizadas y limpiamos las cartas y los pts de la ronda para la nueva ronda
+            dades.playerPTS.update({i: {"roundPoints": dades.players[i]["roundPoints"], "bet": dades.players[i]["bet"]}})
+
+        # Sumamos las rondas finalizadas
         dades.context_game["round"] = dades.context_game["round"] + 1
 
         # Repartimos puntos, eliminamos jugadores si se quedan sin puntos y ordenamos prioridades si hay nueva banca
 
-        # list_players_con_posibilidad = []
-        # suma_bets_bank = 0
-        # empate = []
-        #
-        # for i in dades.game:
-        #     if dades.players[i]['bank'] is False:
-        #         if dades.players[i]['roundPoints'] > 7.5:
-        #             suma_bets_bank = suma_bets_bank + dades.players[i]['bet']
-        #             new_points = (dades.players[i]['points'] - dades.players[i]['bet'])
-        #             dades.players[i]['points'] = new_points
-        #             if dades.players[i]['points'] == 0:
-        #                 dades.game.remove(i)
-        #         elif 7.5 > dades.players[i]['roundPoints'] > 0:
-        #             list_players_con_posibilidad.append(i)
-        #         elif dades.players[i]['roundPoints'] == 7.5:
-        #             empate.append(i)
-        #             list_players_con_posibilidad.append(i)
-        #     elif dades.players[i]['bank'] is True:
-        #         if list_players_con_posibilidad == []:
-        #             dades.players[i]['points'] += suma_bets_bank
-        #         elif list_players_con_posibilidad != []:
-        #             print("hola")
-
+        list_players_con_posibilidad = []
+        suma_bets_bank = 0
+        empate = []
+        resta_bets_posibilidades = 0
+        apuesta_empate = 0
+        for i in dades.game:
+            if dades.players[i]['bank'] is False:
+                if dades.players[i]['roundPoints'] > 7.5:
+                    suma_bets_bank = suma_bets_bank + dades.players[i]['bet']
+                    new_points = (dades.players[i]['points'] - dades.players[i]['bet'])
+                    dades.players[i]['points'] = new_points
+                    if dades.players[i]['points'] == 0:
+                        dades.game.remove(i)
+                elif 7.5 > dades.players[i]['roundPoints'] > 0:
+                    list_players_con_posibilidad.append(i)
+                    resta_bets_posibilidades += dades.players[i]['bet']
+                elif dades.players[i]['roundPoints'] == 7.5:
+                    empate.append(i)
+                    list_players_con_posibilidad.append(i)
+                    apuesta_empate = suma_bets_bank + dades.players[i]['bet']
+            elif dades.players[i]['bank'] is True:
+                if dades.players[i]['roundPoints'] > 7.5:
+                    pts_lost = (dades.players[i]['points'] - resta_bets_posibilidades)
+                    dades.players[i]['points'] = pts_lost
+                    if empate != []:
+                        players_bank = new_bank(empate)
+                        dades.players[players_bank]['points'] += (dades.players[players_bank]['bet'] * 2)
+                        dades.players[players_bank]['bank'] = True
+                        dades.players[i]['bank'] = False
+                        dades.players[players_bank]['priority'], dades.players[i]['priority'] = dades.players[i][
+                                                                                                    'priority'], \
+                                                                                                dades.players[
+                                                                                                    players_bank][
+                                                                                                    'priority']
+                    if dades.players[i]['points'] == 0:
+                        player_bank = new_bank(list_players_con_posibilidad)
+                        dades.players[player_bank]['bank'] = True
+                        dades.players[player_bank]['priority'] = dades.players[i]['priority']
+                        dades.game.remove(i)
+                    for j in list_players_con_posibilidad:
+                        suma = dades.players[j]['bet'] + dades.players[j]['points']
+                        dades.players[j]['points'] = suma
+                elif list_players_con_posibilidad == []:
+                    dades.players[i]['points'] += suma_bets_bank
+                elif 7.5 > dades.players[i]['roundPoints'] > 0:
+                    player_posible_bank = new_bank_2(list_players_con_posibilidad)
+                    if dades.players[i]['roundPoints'] > dades.players[player_posible_bank]['roundPoints']:
+                        dades.players[i]['points'] += dades.players[player_posible_bank]['bet'] + suma_bets_bank
+                        nuevos_points = (dades.players[player_posible_bank]['points'] -
+                                         dades.players[player_posible_bank]['bet'])
+                        dades.players[player_posible_bank]['points'] = nuevos_points
+                    elif dades.players[i]['roundPoints'] < dades.players[player_posible_bank]['roundPoints']:
+                        if dades.players[player_posible_bank]['roundPoints'] == 7.5:
+                            dades.players[player_posible_bank]['bank'] = True
+                            dades.players[i]['bank'] = False
+                            dades.players[player_posible_bank]['priority'], dades.players[i]['priority'] = \
+                                dades.players[i]['priority'], dades.players[player_posible_bank]['priority']
+                            dades.players[player_posible_bank]['points'] += dades.players[player_posible_bank]['bet']
+                            pts_lost = (dades.players[i]['points'] - resta_bets_posibilidades)
+                            dades.players[i]['points'] = pts_lost
+                        else:
+                            dades.players[player_posible_bank]['points'] += dades.players[player_posible_bank]['bet']
+                            pts_lost = (dades.players[i]['points'] - resta_bets_posibilidades)
+                            dades.players[i]['points'] = pts_lost
+                elif empate != [] and dades.players[i]['roundPoints'] == 7.5:
+                    dades.players[i]['points'] += apuesta_empate
+                    apuesta_empate = 0
+        for i in dades.player_seleccionado:
+            dades.player_game_round.update({i: {}})
+            for j in range(dades.context_game["round"]):
+                if dades.players[i]["bank"] is True:
+                    dades.player_game_round[i].update({j:{"is_bank": 1, "bet_points":dades.players[i]['bet'],
+                                                          "cards_value":dades.players[i]["roundPoints"],
+                                                          "starting_round_points":dades.nif_starting_points[i],
+                                                          "ending_round_points":dades.players[i]["roundPoints"]}})
+                elif dades.players[i]["bank"] is False:
+                    dades.player_game_round[i].update({j: {"is_bank": 0, "bet_points": dades.players[i]['bet'],
+                                                           "cards_value": dades.players[i]["roundPoints"],
+                                                           "starting_round_points": dades.nif_starting_points[i],
+                                                           "ending_round_points": dades.players[i]["roundPoints"]}})
+        cab1 = f"***********************************************************  STATS AFTER ROUND {dades.context_game['round']-1} **********" \
+               f"*************************************************\n"
+        print(cab1)
         print(dades.cabecera_menu03resultado)
         dades.print_resultado_ronda = 'yes'
         printStats()
+        clearCards()
         answer = input("Enter to continue to new Round, exit to leave game:")
         if answer == 'exit' or answer == 'EXIT':
             print(dades.menu03game_over)
-            print("The winner is 90782081T - bot1, in 0 rounds,  with 30 points")
+            ganador = winner(dades.game)
+            print(f"The winner is {ganador} - {dades.players[ganador]['name']}, in {dades.context_game['round']-1} rounds,  "
+                f"with {dades.players[ganador]['points']} points")
             tiempo_final = actual_hour()
             insertBBDDcardgame(players=dades.num_jugadores, rounds=dades.rounds, start_hour=tiempo_actual,
                                end_hour=tiempo_final, deck_id=dades.deck)
-
             # Se hace un clear de todos los campos que se llenan en la partida de los jugadores menos NIF, nombre y type
             for i in dades.game:
                 dades.players[i]["cards"] = ''
@@ -1022,13 +1127,14 @@ def playGame():
             dades.players[i]["roundPoints"] = 0
     else:
         print(dades.menu03game_over)
-        print("The winner is 90782081T - bot1, in 0 rounds,  with 30 points")
+        ganador = winner(dades.game)
+        print(f"The winner is {ganador} - {dades.players[ganador]['name']}, in {dades.context_game['round']-1} rounds,  "
+              f"with {dades.players[ganador]['points']} points")
 
         # Insertamos datos en los diccionarios
         tiempo_final = actual_hour()
         insertBBDDcardgame(players=dades.num_jugadores, rounds=dades.rounds, start_hour=tiempo_actual,
                            end_hour=tiempo_final, deck_id=dades.deck)
-
         # Se hace un clear de todos los campos que se llenan en la partida de los jugadores menos NIF, nombre y type
         for i in dades.game:
             dades.players[i]["cards"] = ''
@@ -1039,8 +1145,33 @@ def playGame():
             dades.players[i]["points"] = 0
             dades.players[i]["roundPoints"] = 0
 
-        input("Enter to continue ")
+        input("Enter to continue\n ")
         return
+def winner(lista):
+    maximo = 0
+    ganador = ''
+    for i in lista:
+        if dades.players[i]['points'] > maximo:
+            maximo = dades.players[i]['points']
+            ganador = i
+    return ganador
+def new_bank(lista):
+    maximo = 0
+    persona = ''
+    for i in lista:
+        if dades.players[i]['priority'] > maximo:
+            maximo = dades.players[i]['priority']
+            persona = i
+    return persona
+
+def new_bank_2(lista):
+    maximo = 0
+    pers = ''
+    for i in lista:
+        if dades.players[i]['roundPoints'] > maximo:
+            maximo = dades.players[i]['roundPoints']
+            pers = i
+    return pers
 
 # Función que resetea los puntos a 20 al inicio de la partida
 def resetPoints():
@@ -1050,22 +1181,21 @@ def resetPoints():
 # Función que ejecuta el menú03
 def menu03():
     while dades.game != [] and not len(dades.game) < 2 and dades.context_game["mazo"] != " ":
-        print("El juego")
         playGame()
         return
     else:
         if dades.game == []:
             print("Set the players that compose the game first")
             input("Enter to continue ")
-            menu00()
+            return
         elif len(dades.player_seleccionado) < 2:
             print("Set the players that compose the game first")
             input("Enter to continue ")
-            menu00()
+            return
         elif dades.context_game["mazo"] == " ":
             print("Set the deck of cards first")
             input("Enter to continue ")
-            menu00()
+            return
 
 # Función que comprueba que mínimo hayan dos personas con puntos para que continue el juego
 def checkMinimun2PlayerWithPoints():
@@ -1146,7 +1276,28 @@ def insertBBDDcardgame(players=0, rounds=0, start_hour="", end_hour="", deck_id=
     mycursor.execute(sql, val)
     mydb.commit()
 
+    mycursor.execute(f"SELECT cardgame_id FROM cardgame WHERE start_hour like '{start_hour}'")
+    dades.cardgame_id = mycursor.fetchall()
+    for j in dades.cardgame_id:
+        for i in dades.player_seleccionado:
+            insertBBDDplayergame(j[0], i, dades.players[i]['initialCard'], 20, dades.players[i]['points'])
+    for x in dades.cardgame_id:
+        insertBBDDplayergameround(dades.player_game_round, x[0])
 
+def insertBBDDplayergame(cardgame_id=0, idplayer='', initial_card_id='', starting_points=0, ending_points=0):
+
+    sql = "INSERT INTO player_game (cardgame_id, player_id, initial_card_id, starting_points, ending_points) VALUES (%s, %s, %s, %s, %s)"
+    val = (cardgame_id, idplayer, initial_card_id, starting_points, ending_points)
+    mycursor.execute(sql, val)
+    mydb.commit()
+
+def insertBBDDplayergameround(dict, ident):
+    for i in dict.keys():
+        for j in dict[i]:
+            sql = "INSERT INTO player_game_round (round_num, cardgame_id, player_id, is_bank, bet_points, card_value, starting_round_points,ending_round_points) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+            val = (j, ident, i, dict[i][j]["is_bank"], dict[i][j]["bet_points"], dict[i][j]["cards_value"], dict[i][j]["starting_round_points"], dict[i][j]["ending_round_points"])
+            mycursor.execute(sql, val)
+            mydb.commit()
 # Menú 4
 def menu04():
     dejar_este_nivel = False
@@ -1170,18 +1321,42 @@ def menu04():
 
 # Opciones del menú 4
 def menu041():
-    print("aquí va el ejercicio")
-    # dict_players()
-    # print(dades.players)
+    print(dades.cabecera_menu041)
+    print('''************************************************************************
+    \nPlayer ID                         Earnings  Games Played  Minutes Played
+    \n************************************************************************''')
+    mycursor.execute(
+        "SELECT player_id, earningpoints, gamesplayed, minutesplayed FROM ranking ORDER BY earningpoints desc")
+    myresult = mycursor.fetchall()
+    for i in myresult:
+        print(i[0].ljust(9) + str(i[1]).rjust(33) + str(i[2]).rjust(14) + str(i[3]).rjust(16))
+
+    input("Enter to continue ")
 
 
 def menu042():
-    print("aquí va el ejercicio")
-
+    print(dades.cabecera_menu042)
+    print('''************************************************************************
+        \nPlayer ID                         Earnings  Games Played  Minutes Played
+        \n************************************************************************''')
+    mycursor.execute(
+        "SELECT player_id, earningpoints, gamesplayed, minutesplayed FROM ranking ORDER BY gamesplayed desc")
+    myresult = mycursor.fetchall()
+    for i in myresult:
+        print(i[0].ljust(9) + str(i[1]).rjust(33) + str(i[2]).rjust(14) + str(i[3]).rjust(16))
+    input("Enter to continue ")
 
 def menu043():
-    print("aquí va el ejercicio")
-
+    print(dades.cabecera_menu043)
+    print('''************************************************************************
+           \nPlayer ID                         Earnings  Games Played  Minutes Played
+           \n************************************************************************''')
+    mycursor.execute(
+        "SELECT player_id, earningpoints, gamesplayed, minutesplayed FROM ranking ORDER BY minutesplayed desc")
+    myresult = mycursor.fetchall()
+    for i in myresult:
+        print(i[0].ljust(9) + str(i[1]).rjust(33) + str(i[2]).rjust(14) + str(i[3]).rjust(16))
+    input("Enter to continue ")
 
 def menu05():
     dejar_este_nivel = False
@@ -1230,31 +1405,24 @@ def actual_hour():
 
 # Opciones del menú 5
 def menu051():
-    print("aquí va el ejercicio")
-    # sql = "INSERT INTO card (card_id, card_name, card_value, card_priority, card_real_value, deck_id) " \
-    #       "VALUES (%s, %s, %s, %s, %s, %s)"
-    #
-    # for i in dades.cartas_espanyola:
-    #     card_id = i
-    #     literal = dades.cartas_espanyola[i]["literal"]
-    #     value = dades.cartas_espanyola[i]["value"]
-    #     priority = dades.cartas_espanyola[i]["priority"]
-    #     realValue = dades.cartas_espanyola[i]["realValue"]
-    #
-    #     val = (card_id, literal, value, priority, realValue, 1)
-    #     mycursor.execute(sql, val)
-    #     mydb.commit()
-    #     print(mycursor.rowcount, "Record Inserted")
-
+    print("ejercicio")
 
 def menu052():
-    print("aquí va el ejercicio")
-    # lista = mezclar_lista(dades.mazo_espanyola)
-    # setGamePriority(lista)
-
-
+    print(dades.cabecera_menu05)
+    mycursor.execute("SELECT player_id, bet_points FROM sah.highest_bet")
+    r = mycursor.fetchall()
+    print("player whith highest bet".ljust(40), "bet_points")
+    for x, y in r:
+        print(str(x).ljust(40), y)
+    input("\nEnter to continue")
 def menu053():
-    print("aquí va el ejercicio")
+    print(dades.cabecera_menu05)
+    mycursor.execute("SELECT player_id, bet_points FROM sah.lowest_bet")
+    r = mycursor.fetchall()
+    print("player whith lowest bet".ljust(40), "bet_points")
+    for x, y in r:
+        print(str(x).ljust(40), y)
+    input("\nEnter to continue")
 
 
 def menu054():
@@ -1270,15 +1438,32 @@ def menu056():
 
 
 def menu057():
-    print("aquí va el ejercicio")
-
+    print(dades.cabecera_menu05)
+    mycursor.execute("SELECT cardgame_id, banks FROM sah.banks_in_game")
+    r = mycursor.fetchall()
+    print("player whith lowest bet".ljust(40), "bet_points")
+    for x, y in r:
+        print(str(x).ljust(40), y)
+    input("\nEnter to continue")
 
 def menu058():
-    print("aquí va el ejercicio")
+    print(dades.cabecera_menu05)
+    mycursor.execute("SELECT cardgame_id, bp FROM sah.avg_bet_per_game")
+    r = mycursor.fetchall()
+    print("player whith lowest bet".ljust(40), "bet_points")
+    for x, y in r:
+        print(str(x).ljust(40), y)
+    input("\nEnter to continue")
 
 
 def menu059():
-    print("aquí va el ejercicio")
+    print(dades.cabecera_menu05)
+    mycursor.execute("SELECT cardgame_id, abp FROM sah.avg_bets_1st_round")
+    r = mycursor.fetchall()
+    print("player whith lowest bet".ljust(40), "bet_points")
+    for x, y in r:
+        print(str(x).ljust(40), y)
+    input("\nEnter to continue")
 
 
 def menu0510():
